@@ -1,0 +1,57 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  # Lets ci.yml call this as a required job so a failing scan actually
+  # blocks the Tier A gate, not just runs in parallel with no effect
+  # (docs/engineering/quality-strategy.md §1: lesson from the reused pattern
+  # in marcelo-goncalves-blog — CI that exists in YAML but doesn't gate).
+  workflow_call:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      # Pinned version, same reasoning as marcelo-goncalves-blog: an
+      # unpinned Semgrep can change scan results with no code change, and
+      # Dependabot doesn't cover pip inside workflows.
+      - name: Install Semgrep
+        run: pip install semgrep==1.99.0
+
+      - name: Scan repository (TypeScript/Node + OWASP/secrets/JWT rulesets)
+        run: |
+          semgrep scan \
+            --config p/typescript \
+            --config p/nodejs \
+            --config p/owasp-top-ten \
+            --config p/secrets \
+            --config p/jwt \
+            --severity ERROR \
+            --error \
+            --quiet \
+            apps/ services/ connectors/ packages/
+
+  gitleaks:
+    name: Secret Detection (Gitleaks)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

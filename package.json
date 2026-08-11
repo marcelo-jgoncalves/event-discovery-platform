@@ -1,0 +1,25 @@
+{
+  "name": "event-discovery-platform",
+  "private": true,
+  "version": "0.0.0",
+  "engines": {
+    "node": "24.x",
+    "npm": ">=11"
+  },
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "connectors/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "node scripts/run-workspaces.mjs typecheck",
+    "lint": "node scripts/run-workspaces.mjs lint",
+    "format:check": "prettier --check .",
+    "test": "node scripts/run-workspaces.mjs test",
+    "verify": "npm run typecheck && npm run lint && npm run test"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}
