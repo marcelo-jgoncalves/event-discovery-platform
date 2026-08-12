@@ -2,16 +2,48 @@
 
 Itens conhecidos e deliberadamente adiados, com dono/critério de reavaliação — não escondidos. Ver `docs/engineering/quality-strategy.md` §12 (política de honestidade sobre dívida técnica).
 
-## Bootstrap pendente (ver `docs/engineering/quality-strategy.md` §13)
+## Phase 0 — Foundations (2026-08-11): concluído
+
+Ver `docs/operations/phase-0-kickoff-prompt.md` e ADR-010 para o registro completo das decisões tomadas.
 
 ```text
-[ ] Formalizar os ADRs consolidados just-in-time, antes da implementação
-      do componente afetado (docs/engineering/decisions/)
-[ ] Configurar CI Tier A/B/C (quality-strategy.md §1.1), incluindo verify,
-      Dependency Review, Semgrep, Gitleaks, npm audit, Trivy/TFLint e
-      integration-aws-real
+[x] Repositório Git inicializado, repositório GitHub criado
+      (marcelo-jgoncalves/event-discovery-platform, público — ver ADR-010 §3)
+[x] Branch protection em main confirmada via API (enforce_admins,
+      required_pull_request_reviews com required_approving_review_count=0
+      — projeto solo, ver ADR-010 §4 —, no force-push, no deletion,
+      conversation resolution obrigatória)
+[x] OIDC Provider do GitHub reaproveitado (conta 975707451904, já existia
+      do projeto marcelo-goncalves-blog)
+[x] IAM role edp-dev-role-cicd-github-actions criada via Terraform
+      (infrastructure/terraform/modules/iam-github-oidc/), trust policy
+      corrigida para a claim real do GitHub (ADR-010 §2)
+[x] Policy de CI escopada a edp-* + state bucket, sem Resource: "*",
+      sem permissão de apply de produto ainda
+[x] Pipeline Tier A rodando de verdade em PR/push (.github/workflows/
+      ci.yml, security.yml): typecheck, lint, format:check, unit,
+      integration-fast (DynamoDB Local), dependency review, npm audit,
+      Semgrep, Gitleaks, terraform validate+plan, TFLint, Trivy IaC —
+      todos os 9 checks verdes, confirmado ao vivo via gh run view
+[x] Actions pinadas por SHA, npm ci (nunca npm install), Node 24 pinado
+      (.nvmrc + engine-strict)
+```
+
+## Bootstrap pendente (ver `docs/engineering/quality-strategy.md` §13)
+
+Explicitamente fora do escopo da Phase 0 (`docs/operations/phase-0-kickoff-prompt.md` §5) — depende de ambiente dev implantado, que ainda não existe.
+
+```text
+[ ] Tier B (integration-aws-real, E2E, smoke, validação IAM real,
+      DAST baseline) — depende de ambiente dev implantado
+[ ] Tier C (scale, failure, DAST completo, restore drill) — depende de Tier B
+[ ] CD real (terraform apply automático de recursos de produto) — decisão
+      arquiteturalmente significativa, merece ADR próprio quando chegar
+      (ver ADR-010, trigger de revisão)
 [ ] CloudTrail + GuardDuty no primeiro ambiente AWS
-[ ] Branch protection confirmada via API antes do primeiro merge em main
+[ ] Formalizar os ADRs consolidados just-in-time, antes da implementação
+      do componente afetado (docs/engineering/decisions/) — ADR-001 a
+      ADR-009 continuam pendentes de criação; ADR-010 já existe
 [ ] Testes de regra de negócio crítica (quality-strategy.md §3) como
       primeiro E2E
 [ ] Dashboards de SLO (Match/Delivery Latency, queue age) antes do
@@ -20,7 +52,8 @@ Itens conhecidos e deliberadamente adiados, com dono/critério de reavaliação 
       armazenar o primeiro dado de usuário real
 [ ] Implementar Data Quality invariants + métricas (quality-strategy.md §5.4)
       antes do primeiro evento real poder ficar READY
-[ ] Habilitar Dependabot + Dependency Review e pin de Node/package manager
+[ ] Habilitar Dependabot security updates (Dependency Review já está
+      ativo no Tier A; falta o bot de atualização automática)
 [ ] Adicionar DAST Tier B e threat model inicial antes do primeiro beta
 [ ] Adicionar axe/Playwright para fluxos críticos do frontend
 [ ] Executar primeiro restore drill antes de considerar backup "validado"
