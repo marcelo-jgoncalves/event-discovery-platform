@@ -1,11 +1,28 @@
 #!/usr/bin/env node
-// Runs every registered policy check under quality/policies/. Currently
-// empty (ADR-011: policies are added when the code they protect exists,
-// never ahead of it) — this prints that honestly instead of pretending to
-// have checked something. Once the first policy lands, wire its runner in
-// here rather than leaving this a permanent no-op.
-console.log('[quality-check] no policies registered yet under quality/policies/ — 0 to run.');
-console.log(
-  '[quality-check] see docs/engineering/quality-rules.md for rules with real enforcement today (CI-level, not here).',
-);
+// Runs every registered policy check under quality/policies/. First real
+// policy landed in Phase 1 (Identity): the architecture fitness function
+// that forbids importing services/identity/src/pii from outside
+// services/identity (ADR-011 trigger: "when the first module's code
+// exists"). Semgrep custom rules (EDP004) run inside CI's existing Semgrep
+// job (.github/workflows/security.yml), not duplicated here.
+import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
+
+let failed = false;
+
+const violations = checkNoExternalPiiImport(process.cwd());
+if (violations.length > 0) {
+  failed = true;
+  console.error('[quality-check] no-external-pii-import: VIOLATIONS FOUND');
+  for (const v of violations) {
+    console.error(`  ${v.file} imports "${v.importSpecifier}"`);
+  }
+} else {
+  console.log('[quality-check] no-external-pii-import: OK');
+}
+
+if (failed) {
+  process.exit(1);
+}
+
+console.log('[quality-check] 1/1 registered policy passed.');
 process.exit(0);
