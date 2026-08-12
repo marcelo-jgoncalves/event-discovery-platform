@@ -6,3 +6,12 @@ module "iam-github-oidc" {
   github_repo    = var.github_repo
   tfstate_bucket = "${local.project_name}-${var.environment}-tfstate"
 }
+
+# Phase 1 — Identity (spec-identity.md, ADR-012): Cognito User Pool/Client +
+# UsersTable. First real product infrastructure in this repo (everything
+# before this module was CI/CD foundation only).
+module "identity" {
+  source = "./modules/identity"
+
+  environment = var.environment
+}
