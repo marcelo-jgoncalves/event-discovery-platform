@@ -1,0 +1,209 @@
+name: CI (Tier A)
+
+# Tier A of docs/engineering/quality-strategy.md §1.1 — every PR, mandatory,
+# fast. Tier B (integration-aws-real, E2E, smoke, DAST baseline) and Tier C
+# (scale, failure, full DAST, restore drill) are explicitly deferred until
+# a dev environment exists (docs/operations/phase-0-kickoff-prompt.md §5) —
+# tracked in docs/backlog.md, not silently skipped.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '24'
+  TERRAFORM_VERSION: '1.15.8'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  # ==============================================================
+  # verify: typecheck + lint + format:check + unit — real gates from
+  # commit zero even with zero workspaces yet (see scripts/run-workspaces.mjs
+  # for why this doesn't hard-fail on an empty monorepo).
+  # ==============================================================
+  verify:
+    name: Verify (typecheck, lint, format, unit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - name: Install dependencies (npm workspaces)
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Unit + contract tests
+        run: npm run test
+
+  # ==============================================================
+  # integration-fast: DynamoDB Local / emulated services, no mock of
+  # persistence semantics (quality-strategy.md §1.1). No workspace defines
+  # test:integration yet — job exists and runs against the emulator from
+  # commit zero regardless, per the phase-0 kickoff instruction.
+  # ==============================================================
+  integration-fast:
+    name: Integration (fast, DynamoDB Local)
+    runs-on: ubuntu-latest
+
+    services:
+      dynamodb:
+        image: amazon/dynamodb-local@sha256:d7ebddeb60fa418bcda218a6c6a402a58441b2a20d54c9cb1d85fd5194341753 # 2.5.2
+        ports:
+          - 8000:8000
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - name: Install dependencies (npm workspaces)
+        run: npm ci
+
+      - name: Run integration-fast tests
+        run: node scripts/run-workspaces.mjs test:integration
+        env:
+          AWS_ENDPOINT_URL: http://localhost:8000
+
+  # ==============================================================
+  # dependency-review: PR-only by nature (compares base vs head).
+  # ==============================================================
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
+
+  npm-audit:
+    name: npm audit (high/critical)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: npm ci
+        run: npm ci
+
+      - name: npm audit --audit-level=high
+        run: npm audit --audit-level=high
+
+  # ==============================================================
+  # security-scans: Semgrep + Gitleaks, reused from security.yml via
+  # workflow_call so a failure here actually blocks this workflow's
+  # conclusion (not just an independent parallel run).
+  # ==============================================================
+  security-scans:
+    name: Security Scans (Semgrep + Gitleaks)
+    uses: ./.github/workflows/security.yml
+    secrets: inherit
+
+  # ==============================================================
+  # infra: terraform fmt/validate/plan + TFLint + Trivy IaC config scan.
+  # No `terraform apply` here — Tier A is plan-only (phase-0-kickoff-prompt
+  # §4-5); apply is a Tier B/CD concern once a real deploy pipeline exists.
+  # ==============================================================
+  infra:
+    name: Validate Infra (Terraform + TFLint + Trivy)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform fmt check
+        working-directory: infrastructure/terraform
+        run: terraform fmt -check -recursive
+
+      - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+          aws-region: us-east-1
+
+      - name: Terraform init (dev)
+        working-directory: infrastructure/terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=event-discovery-platform-dev-tfstate" \
+            -backend-config="key=edp/terraform.tfstate" \
+            -backend-config="region=us-east-1" \
+            -backend-config="use_lockfile=true" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform validate
+        working-directory: infrastructure/terraform
+        run: terraform validate
+
+      - name: Terraform plan (dev)
+        working-directory: infrastructure/terraform
+        run: terraform plan -var-file=env/dev.tfvars -lock-timeout=60s
+
+      - uses: terraform-linters/setup-tflint@6e1e0642c0289bd619021bf6b34e3c08ed1e005a # v6.3.0
+        with:
+          tflint_version: v0.64.0
+
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ hashFiles('infrastructure/terraform/.tflint.hcl') }}
+
+      - name: TFLint
+        working-directory: infrastructure/terraform
+        run: |
+          tflint --init
+          tflint --recursive --chdir=.
+
+      - name: Trivy config scan (IaC)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'infrastructure/terraform'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
