@@ -118,7 +118,11 @@ Nenhum código de produto implementado ainda (`apps/`, `services/`, `connectors/
 [x] IAM role de CI via OIDC (Terraform), least-privilege, escopada a edp-*
 [x] Sistema de enforcement de qualidade independente de IA (esqueleto +
       2 scripts com verificação real: ADR-011)
-[ ] Primeira feature de produto — próximo passo em aberto
+[x] Phase 1 — Identity: spec-identity.md, ADR-012, Terraform (Cognito +
+      UsersTable), services/identity (signup/login), primeira Architecture
+      Fitness Function e primeira Semgrep custom rule (EDP004) com fixture
+      comprovada — ver docs/backlog.md "Phase 1 — Identity"
+[ ] Phase 2 (Catalog) — próximo passo em aberto
 ```
 
 Checklist de bootstrap completo (o que falta e por quê): `docs/engineering/quality-strategy.md` §15 e `docs/backlog.md`.

@@ -1,0 +1,26 @@
+rules:
+  - id: edp004-no-raw-pii-log
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >
+      EDP004: raw PII (email, phone, name) must never be logged. Hash it
+      first (see services/identity/src/pii/hash.ts, spec-identity.md §8) —
+      same pattern already decided for chatId in spec-notification-delivery.md.
+    metadata:
+      references:
+        - docs/architecture/spec-identity.md
+        - docs/engineering/quality-rules.md
+    patterns:
+      - pattern-either:
+          - pattern: console.$METHOD(..., $X.email, ...)
+          - pattern: console.$METHOD(..., $X.phone, ...)
+          - pattern: console.$METHOD(..., $X.name, ...)
+          - pattern: 'console.$METHOD({ ..., email: $E, ... })'
+          - pattern: 'console.$METHOD({ ..., phone: $E, ... })'
+          - pattern: 'console.$METHOD({ ..., name: $E, ... })'
+          - pattern: logger.$METHOD(..., $X.email, ...)
+          - pattern: logger.$METHOD(..., $X.phone, ...)
+          - pattern: logger.$METHOD(..., $X.name, ...)
+          - pattern: 'logger.$METHOD({ ..., email: $E, ... })'
+          - pattern: 'logger.$METHOD({ ..., phone: $E, ... })'
+          - pattern: 'logger.$METHOD({ ..., name: $E, ... })'

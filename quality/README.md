@@ -1,6 +1,6 @@
 # quality/
 
-Esqueleto do sistema de enforcement independente de IA (ADR-011, `docs/engineering/quality-enforcement-system.md`). Nasce vazio, deliberadamente — regras/policies são adicionadas quando o código que elas protegem existe, nunca antecipadamente (ver ADR-011, alternativas consideradas).
+Sistema de enforcement independente de IA (ADR-011, `docs/engineering/quality-enforcement-system.md`). Nasceu vazio, deliberadamente — regras/policies são adicionadas quando o código que elas protegem existe, nunca antecipadamente (ver ADR-011, alternativas consideradas). Primeiras regras reais: Phase 1 (Identity) — ver QR-012/QR-013 em `docs/engineering/quality-rules.md`.
 
 ```text
 policies/          — regras executáveis por domínio (code, architecture, terraform, github, documentation)

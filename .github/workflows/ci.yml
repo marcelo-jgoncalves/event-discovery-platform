@@ -59,6 +59,12 @@ jobs:
       - name: Unit + contract tests
         run: npm run test
 
+      # First real policy landed in Phase 1 (Identity): the
+      # no-external-pii-import architecture fitness function
+      # (ADR-011 trigger — quality/README.md).
+      - name: Architecture fitness functions
+        run: node quality/scripts/quality-check.mjs
+
   # ==============================================================
   # integration-fast: DynamoDB Local / emulated services, no mock of
   # persistence semantics (quality-strategy.md §1.1). No workspace defines

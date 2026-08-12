@@ -30,7 +30,7 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep==1.99.0
 
-      - name: Scan repository (TypeScript/Node + OWASP/secrets/JWT rulesets)
+      - name: Scan repository (TypeScript/Node + OWASP/secrets/JWT rulesets + project custom rules)
         run: |
           semgrep scan \
             --config p/typescript \
@@ -38,6 +38,7 @@ jobs:
             --config p/owasp-top-ten \
             --config p/secrets \
             --config p/jwt \
+            --config quality/policies/code/ \
             --severity ERROR \
             --error \
             --quiet \

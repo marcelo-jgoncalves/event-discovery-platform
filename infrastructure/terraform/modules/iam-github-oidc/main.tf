@@ -137,6 +137,54 @@ data "aws_iam_policy_document" "ci" {
     actions   = ["sts:GetCallerIdentity"]
     resources = ["*"]
   }
+
+  # Grows here, PR by PR, as real product Terraform lands (see comment
+  # above the ci policy) — first addition: Phase 1 Identity module
+  # (modules/identity), plan-only, no write/apply actions.
+  statement {
+    sid    = "PlanIdentityDynamoDb"
+    effect = "Allow"
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:ListTagsOfResource",
+      "dynamodb:DescribeContinuousBackups",
+    ]
+    resources = ["arn:aws:dynamodb:*:*:table/Edp*"]
+  }
+
+  statement {
+    sid    = "PlanIdentityCognito"
+    effect = "Allow"
+    actions = [
+      "cognito-idp:DescribeUserPool",
+      "cognito-idp:DescribeUserPoolClient",
+      "cognito-idp:ListTagsForResource",
+    ]
+    resources = [
+      "arn:aws:cognito-idp:*:*:userpool/*",
+    ]
+  }
+
+  statement {
+    sid    = "PlanIdentitySecretsManager"
+    effect = "Allow"
+    actions = [
+      "secretsmanager:DescribeSecret",
+      "secretsmanager:GetResourcePolicy",
+    ]
+    resources = ["arn:aws:secretsmanager:*:*:secret:edp-*"]
+  }
+
+  statement {
+    sid    = "PlanIdentityIamRole"
+    effect = "Allow"
+    actions = [
+      "iam:GetPolicy",
+      "iam:GetPolicyVersion",
+      "iam:ListPolicyVersions",
+    ]
+    resources = ["arn:aws:iam::*:policy/edp-*"]
+  }
 }
 
 resource "aws_iam_policy" "ci" {
