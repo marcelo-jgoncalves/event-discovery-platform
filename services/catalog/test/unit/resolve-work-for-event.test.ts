@@ -47,10 +47,7 @@ test('stays UNRESOLVED when no candidate Work exists yet', () => {
 });
 
 test('stays UNRESOLVED when the title is ambiguous (multiple candidates, e.g. a remake)', () => {
-  const result = resolveWorkForEvent(screeningEvent(), [
-    work('WORK#tmdb:1'),
-    work('WORK#tmdb:2'),
-  ]);
+  const result = resolveWorkForEvent(screeningEvent(), [work('WORK#tmdb:1'), work('WORK#tmdb:2')]);
   assert.equal(result.resolutionStatus, 'UNRESOLVED');
   assert.equal(result.workId, undefined);
 });

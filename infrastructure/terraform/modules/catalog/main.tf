@@ -45,6 +45,7 @@ resource "aws_dynamodb_table" "catalog" {
 resource "aws_sqs_queue" "ingestion_dlq" {
   name                      = "${local.name_prefix}-ingestion-dlq"
   message_retention_seconds = 1209600 # 14 days — max SQS allows, gives time to investigate
+  sqs_managed_sse_enabled   = true
 
   tags = {
     Component = var.component
@@ -55,6 +56,7 @@ resource "aws_sqs_queue" "ingestion" {
   name                       = "${local.name_prefix}-ingestion"
   visibility_timeout_seconds = 60
   message_retention_seconds  = 345600 # 4 days
+  sqs_managed_sse_enabled    = true
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.ingestion_dlq.arn

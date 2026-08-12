@@ -80,7 +80,11 @@ test('putEvent writes REVIEW#UNRESOLVED companion item only when unresolved', as
   };
   await repository.putEvent(resolved);
 
-  const unresolved: CanonicalEvent = { ...resolved, canonicalId: `EVENT#ticketmaster:${randomUUID()}`, resolutionStatus: 'UNRESOLVED' };
+  const unresolved: CanonicalEvent = {
+    ...resolved,
+    canonicalId: `EVENT#ticketmaster:${randomUUID()}`,
+    resolutionStatus: 'UNRESOLVED',
+  };
   await repository.putEvent(unresolved);
 
   const reviewQueue = await repository.listUnresolvedEvents();

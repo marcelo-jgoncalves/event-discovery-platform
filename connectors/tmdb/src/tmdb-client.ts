@@ -14,7 +14,11 @@ export class TmdbClient {
   private readonly fetchImpl: typeof fetch;
   private readonly baseUrl: string;
 
-  constructor(apiKey: string, fetchImpl: typeof fetch = fetch, baseUrl: string = TMDB_API_BASE_URL) {
+  constructor(
+    apiKey: string,
+    fetchImpl: typeof fetch = fetch,
+    baseUrl: string = TMDB_API_BASE_URL,
+  ) {
     this.apiKey = apiKey;
     this.fetchImpl = fetchImpl;
     this.baseUrl = baseUrl;
