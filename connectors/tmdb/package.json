@@ -1,0 +1,21 @@
+{
+  "name": "@edp/connector-tmdb",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "node --experimental-strip-types --test test/unit/**/*.test.ts"
+  },
+  "dependencies": {
+    "@edp/provider-contracts": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "typescript-eslint": "^8.46.4",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,23 @@
+rules:
+  - id: edp005-no-direct-provider-call
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >
+      EDP005: no module outside connectors/tmdb or connectors/ticketmaster
+      may call the provider's HTTP API directly (ADR-006 provider boundary,
+      spec-catalog.md §3). Add/extend the connector instead and consume it
+      through the ProviderConnector contract in packages/provider-contracts.
+    metadata:
+      references:
+        - docs/architecture/spec-catalog.md
+        - docs/engineering/decisions/adr-006-provider-abstraction-and-multichannel-boundary.md
+        - docs/engineering/quality-rules.md
+    paths:
+      exclude:
+        - connectors/tmdb/**
+        - connectors/ticketmaster/**
+    patterns:
+      - pattern: fetch($URL, ...)
+      - metavariable-regex:
+          metavariable: $URL
+          regex: .*(api\.themoviedb\.org|app\.ticketmaster\.com).*

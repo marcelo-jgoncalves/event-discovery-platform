@@ -6,23 +6,39 @@
 // exists"). Semgrep custom rules (EDP004) run inside CI's existing Semgrep
 // job (.github/workflows/security.yml), not duplicated here.
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
+import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
 
 let failed = false;
+let passed = 0;
+const total = 2;
 
-const violations = checkNoExternalPiiImport(process.cwd());
-if (violations.length > 0) {
+const piiViolations = checkNoExternalPiiImport(process.cwd());
+if (piiViolations.length > 0) {
   failed = true;
   console.error('[quality-check] no-external-pii-import: VIOLATIONS FOUND');
-  for (const v of violations) {
+  for (const v of piiViolations) {
     console.error(`  ${v.file} imports "${v.importSpecifier}"`);
   }
 } else {
+  passed += 1;
   console.log('[quality-check] no-external-pii-import: OK');
+}
+
+const providerViolations = checkNoExternalProviderCall(process.cwd());
+if (providerViolations.length > 0) {
+  failed = true;
+  console.error('[quality-check] no-external-provider-call: VIOLATIONS FOUND');
+  for (const v of providerViolations) {
+    console.error(`  ${v.file} references provider host "${v.host}" outside its connector`);
+  }
+} else {
+  passed += 1;
+  console.log('[quality-check] no-external-provider-call: OK');
 }
 
 if (failed) {
   process.exit(1);
 }
 
-console.log('[quality-check] 1/1 registered policy passed.');
+console.log(`[quality-check] ${passed}/${total} registered policies passed.`);
 process.exit(0);

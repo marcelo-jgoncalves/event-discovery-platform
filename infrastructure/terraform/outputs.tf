@@ -10,3 +10,11 @@ output "identity_user_pool_id" {
 output "identity_users_table_name" {
   value = module.identity.users_table_name
 }
+
+output "catalog_table_name" {
+  value = module.catalog.catalog_table_name
+}
+
+output "catalog_ingestion_queue_url" {
+  value = module.catalog.ingestion_queue_url
+}
