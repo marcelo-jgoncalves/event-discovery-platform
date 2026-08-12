@@ -29,31 +29,97 @@ Ver `docs/operations/phase-0-kickoff-prompt.md` e ADR-010 para o registro comple
       (.nvmrc + engine-strict)
 ```
 
-## Quality enforcement system (ver ADR-011, `docs/engineering/quality-enforcement-system.md`)
+## Phase 1 — Identity (2026-08-11): concluído (com itens explicitamente adiados abaixo)
 
-Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run quality:check`, `quality:self-test`, `audit:reality`, `audit:project`) já existem e rodam honestamente (0 policies/fixtures registradas ainda, reportado como tal — não como sucesso fabricado). `audit:reality` já verifica de verdade branch protection e a IAM role de CI via API. O que falta, com trigger explícito de quando implementar:
+Ver `docs/architecture/spec-identity.md` e ADR-012 para o registro completo das decisões.
 
 ```text
-[ ] Custom Semgrep rules EDP001-007 (Scan proibido, chatId cru em log,
-      chamada direta ao Telegram fora do provider, redirect inseguro,
-      wildcard IAM em código, payload de provider vazando ao domínio,
-      HTML perigoso sem sanitizer) → trigger: quando o módulo
-      correspondente (matcher, dispatcher, tracking, connectors) tiver o
-      primeiro código real
+[x] spec-identity.md: schema de UsersTable (PROFILE/CONSENT), fluxo Cognito
+      (API direta, sem Hosted UI), consentimento versionado, estado DELETING,
+      retenção de 30 dias (número deste projeto, não herdado do blog)
+[x] ADR-012 (Cognito vs. alternativa, schema de UsersTable) aceito antes de
+      qualquer Terraform de identity (CLAUDE.md Nível 6)
+[x] Terraform: Cognito User Pool + App Client (confidencial, secret em
+      Secrets Manager) + UsersTable (infrastructure/terraform/modules/identity/)
+      — terraform validate + plan (dev) verificados localmente
+[x] resource-naming.md §10.1 (Cognito) adicionado — gap identificado, não
+      drift (o documento nunca cobria Cognito antes)
+[x] services/identity: domain (types, consent, account-status), pii/
+      (cognito-client, hash — único módulo autorizado a tocar PII bruta),
+      infra (UsersTableRepository), application (signup, login)
+[x] Testes unit (consent versionado, transição de status, hash de PII) e
+      integration-local (DynamoDB Local, UsersTableRepository) — unit
+      verificados rodando (10/10 pass); integration verificado por leitura de
+      código e por já rodar no mesmo padrão do CI (.github/workflows/ci.yml
+      job integration-fast), mas não executado localmente nesta sessão por
+      falta de Docker/Java no ambiente de execução — depende do serviço
+      dynamodb-local que CI já sobe via container
+[x] Architecture Fitness Function QR-012 (nenhum módulo fora de
+      services/identity importa services/identity/src/pii/*) — fixture
+      inválida e válida comprovadas via `npm run quality:self-test` antes de
+      promover a regra a quality-rules.md
+[x] Semgrep custom rule QR-013 (EDP004 — no raw PII log) — fixture inválida
+      e válida comprovadas via semgrep --error localmente antes de promover
+      a regra; wired em .github/workflows/security.yml
+[x] CI Tier A atualizado: job `verify` roda `quality:check` (fitness
+      function), job `infra` cobre o novo Terraform, Semgrep inclui
+      quality/policies/code/ — verificado localmente (typecheck/lint/
+      test/quality:check/terraform validate todos verdes), não confirmado
+      ao vivo via `gh run view` nesta sessão (nenhum push feito)
+```
+
+Adiado explicitamente (não esquecimento — ver `docs/architecture/spec-identity.md` §10 e ADR-012):
+
+```text
+[ ] Endpoint HTTP de confirmação de email / reset de senha dedicado →
+      trigger: quando existir um consumidor real (apps/web ou
+      apps/telegram-webhook)
+[ ] Vínculo de conta com Telegram (chatId) → trigger: Phase 5
+[ ] Exclusão de conta ponta-a-ponta (execução real de DELETING: apagar
+      Cognito + UsersTable + futuras entradas em InterestIndexTable) →
+      trigger: Phase 3+, quando houver dado real de usuário para apagar
+[ ] MFA administrativo obrigatório → decisão explícita registrada em
+      ADR-012 (não esquecimento): dono = arquitetura (Marcelo), prazo de
+      revisão = antes do primeiro deploy em produção com usuários reais
+      (Phase 7 — Production Readiness)
+[ ] Cognito Hosted UI / branding customizado → trigger: primeiro frontend
+      web real (apps/web) com razão de produto para customizar
+[ ] Histórico completo de versões de consentimento (hoje só a versão
+      vigente por purpose é mantida) → trigger: requisito real de auditoria
+      retroativa
+[ ] Teste de integração real do fluxo Cognito (signup/login) contra um User
+      Pool de dev implantado → trigger: Tier B, quando existir ambiente dev
+[ ] Endpoint HTTP real (API Gateway/Lambda) expondo signup/login —
+      services/identity hoje só expõe as funções de aplicação, sem handler
+      HTTP ainda (nenhum consumidor real além deste spec)
+```
+
+## Quality enforcement system (ver ADR-011, `docs/engineering/quality-enforcement-system.md`)
+
+Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run quality:check`, `quality:self-test`, `audit:reality`, `audit:project`) já existem. A partir da Phase 1 (Identity), `quality:check`/`quality:self-test` deixaram de reportar "0 policies" — ver QR-012/QR-013 em `docs/engineering/quality-rules.md`. `audit:reality` já verifica de verdade branch protection e a IAM role de CI via API. O que falta, com trigger explícito de quando implementar:
+
+```text
+[ ] Custom Semgrep rules EDP001-003, EDP005-007 (Scan proibido, chamada
+      direta ao Telegram fora do provider, redirect inseguro, wildcard IAM
+      em código, payload de provider vazando ao domínio, HTML perigoso sem
+      sanitizer) → trigger: quando o módulo correspondente (matcher,
+      dispatcher, tracking, connectors) tiver o primeiro código real
+      (EDP004 — raw PII log — já implementado, ver QR-013)
 [ ] OPA/Rego (ou equivalente) para policy-as-code de Terraform (POL-IAM-001
       wildcard, POL-DDB-001 PITR em prod, POL-SQS-001 DLQ obrigatória,
       POL-LAMBDA-001 Function URL pública proibida, POL-LOG-001 retenção
       explícita, POL-TAGS-001 tags obrigatórias, POL-SECRETS-001 Secrets
       Manager) → trigger: quando o primeiro Terraform de recurso de
-      produto (DynamoDB/SQS/Lambda) for adicionado
-[ ] Architecture Fitness Functions (matcher não importa PII, Ticketmaster
-      só em connectors/ticketmaster, Telegram só em
+      produto (DynamoDB/SQS/Lambda) for adicionado (identity já existe;
+      próximo trigger real é catalog/matching/notification)
+[ ] Architecture Fitness Functions adicionais (Ticketmaster só em
+      connectors/ticketmaster, Telegram só em
       notifications/providers/telegram) → trigger: quando
       services/matching, services/notification e connectors/ticketmaster
-      tiverem o primeiro arquivo real
-[ ] Control Integrity Tests (fixtures valid/invalid provando que cada
-      policy acima detecta a violação) → trigger: nasce junto com cada
-      policy/fixture, nunca depois
+      tiverem o primeiro arquivo real (no-external-pii-import — identity —
+      já implementado, ver QR-012)
+[ ] Control Integrity Tests adicionais → trigger: nasce junto com cada
+      policy/fixture nova, nunca depois (padrão já seguido em QR-012/QR-013)
 [ ] Reality audit expandida (GuardDuty, CloudTrail, PITR, Lambda
       concurrency, SQS DLQ attached, Cognito, log retention) → trigger:
       quando os recursos AWS correspondentes existirem (a maioria depende
