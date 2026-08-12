@@ -6,12 +6,20 @@ data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
-# Trust policy restricted to this repo, any ref (StringLike wildcard on the
-# ref segment) — Tier A checks run on `pull_request` (sub is
-# `repo:{org}/{repo}:pull_request`) as well as `push` to main (sub is
-# `repo:{org}/{repo}:ref:refs/heads/main`); scoping by repo instead of a
-# single fixed ref is what makes PR-triggered plan/lint jobs work at all.
-# No fork exception is needed since the condition already pins the repo.
+# Trust policy restricted to this repo, any ref/event.
+#
+# Originally matched only on `sub` via StringLike ("repo:{org}/{repo}:*"),
+# which silently never matched: GitHub's actual `sub` claim embeds immutable
+# numeric owner/repo IDs (observed via CloudTrail:
+# "repo:org@<ownerId>/repo@<repoId>:pull_request"), not the plain "org/repo"
+# string this project (and the reused blog pattern) assumed.
+#
+# AWS separately requires the trust policy to constrain `sub` or
+# `job_workflow_ref` specifically — a condition on `repository` alone is
+# rejected as "not scoped to all" (MalformedPolicyDocument on apply). So both
+# conditions are kept: `repository` for a readable, name-based check, and
+# `sub` with the ID segments wildcarded so it satisfies AWS's requirement
+# without hardcoding the numeric IDs (which would break on repo transfer).
 data "aws_iam_policy_document" "trust" {
   statement {
     effect  = "Allow"
@@ -29,9 +37,21 @@ data "aws_iam_policy_document" "trust" {
     }
 
     condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:repository"
+      values   = ["${var.github_org}/${var.github_repo}"]
+    }
+
+    condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_org}/${var.github_repo}:*"]
+      # Covers both the legacy plain "org/repo" sub format and the observed
+      # immutable-ID format ("org@ownerId/repo@repoId") — whichever GitHub
+      # actually issues for a given event/trigger, either matches.
+      values = [
+        "repo:${var.github_org}/${var.github_repo}:*",
+        "repo:${var.github_org}@*/${var.github_repo}@*:*",
+      ]
     }
   }
 }
