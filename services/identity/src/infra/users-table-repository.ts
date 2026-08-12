@@ -21,11 +21,10 @@ function consentKey(userId: string, purpose: string) {
 
 export class UsersTableRepository {
   private readonly doc: DynamoDBDocumentClient;
+  private readonly tableName: string;
 
-  constructor(
-    private readonly tableName: string,
-    client: DynamoDBClient = new DynamoDBClient({}),
-  ) {
+  constructor(tableName: string, client: DynamoDBClient = new DynamoDBClient({})) {
+    this.tableName = tableName;
     this.doc = DynamoDBDocumentClient.from(client);
   }
 

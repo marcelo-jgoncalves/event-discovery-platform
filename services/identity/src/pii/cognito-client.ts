@@ -51,8 +51,10 @@ async function computeSecretHash(
 
 export class AwsCognitoAuthClient implements CognitoAuthClient {
   private readonly client: CognitoIdentityProviderClient;
+  private readonly config: CognitoAuthClientConfig;
 
-  constructor(private readonly config: CognitoAuthClientConfig) {
+  constructor(config: CognitoAuthClientConfig) {
+    this.config = config;
     this.client = new CognitoIdentityProviderClient({ region: config.region });
   }
 
