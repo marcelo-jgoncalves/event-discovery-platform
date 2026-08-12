@@ -591,7 +591,22 @@ Auditorias registram o que NÃO foi verificado, não só o que foi.
 
 ---
 
-## 13. Checklist de bootstrap (próximos passos concretos)
+## 14. Enforcement independente de IA — regra constitucional
+
+> Nenhum requisito crítico de qualidade pode depender exclusivamente de instrução para IA, revisão de código ou documentação. Todo requisito crítico deve possuir um mecanismo independente de enforcement ou verificação.
+
+Adotada em ADR-011. Para todo requisito crítico novo, a pergunta operacional é "quem garante isso?" — se a resposta for "a IA deveria lembrar", o requisito não tem enforcement suficiente. Quatro camadas, cada uma respondendo a uma pergunta diferente (elaboração completa em `docs/engineering/quality-enforcement-system.md`):
+
+```text
+Static Policy Gates            — o código viola alguma regra proibida?
+Architecture Fitness Functions — a estrutura respeita os boundaries?
+Behavior Tests                 — o sistema se comporta corretamente?
+Reality Audits                 — o que está rodando bate com código/infra/docs?
+```
+
+Registry de regras com enforcement real (não aspiracional): `docs/engineering/quality-rules.md`. Implementação incremental — condicionada ao primeiro código do módulo correspondente existir, não construída antecipadamente sem código para proteger (ADR-011, mesmo princípio de `principles.md` §2 já aplicado no resto deste documento).
+
+## 15. Checklist de bootstrap (próximos passos concretos)
 
 ```text
 [ ] Criar CLAUDE.md na raiz (seção 8.2)

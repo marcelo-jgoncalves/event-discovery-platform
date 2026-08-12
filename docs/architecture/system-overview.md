@@ -72,6 +72,10 @@ Registrar/revisar decisão de qualidade (CI, gates, exceção)
   1. CLAUDE.md
   2. quality-strategy.md
   3. ADR-009
+  4. docs/engineering/quality-rules.md (regras com enforcement real)
+  5. docs/engineering/quality-enforcement-system.md + ADR-011, se a
+     mudança envolver um novo mecanismo de enforcement (não só um gate
+     dentro de um mecanismo já existente)
 
 Criar/alterar infraestrutura (Terraform, novo recurso AWS)
   1. CLAUDE.md
@@ -127,6 +131,9 @@ Provider abstraction          → ADR-006
 Idempotency                   → ADR-007
 Tracking/afiliados            → ADR-008
 Quality gates / exceções      → quality-strategy.md §1.1-1.2, §10.3, ADR-009
+Enforcement independente de
+  IA (policy-as-code, fitness
+  functions, reality audits)  → quality-enforcement-system.md, quality-rules.md, ADR-011
 Resource naming / tagging     → docs/engineering/standards/resource-naming.md
 ```
 

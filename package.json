@@ -17,7 +17,11 @@
     "lint": "node scripts/run-workspaces.mjs lint",
     "format:check": "prettier --check .",
     "test": "node scripts/run-workspaces.mjs test",
-    "verify": "npm run typecheck && npm run lint && npm run test"
+    "verify": "npm run typecheck && npm run lint && npm run test",
+    "quality:check": "npm run verify && node quality/scripts/quality-check.mjs",
+    "quality:self-test": "node quality/scripts/quality-self-test.mjs",
+    "audit:reality": "node quality/scripts/audit-reality.mjs",
+    "audit:project": "node quality/scripts/audit-project.mjs"
   },
   "devDependencies": {
     "prettier": "^3.6.2"

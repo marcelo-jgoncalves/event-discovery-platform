@@ -29,7 +29,49 @@ Ver `docs/operations/phase-0-kickoff-prompt.md` e ADR-010 para o registro comple
       (.nvmrc + engine-strict)
 ```
 
-## Bootstrap pendente (ver `docs/engineering/quality-strategy.md` §13)
+## Quality enforcement system (ver ADR-011, `docs/engineering/quality-enforcement-system.md`)
+
+Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run quality:check`, `quality:self-test`, `audit:reality`, `audit:project`) já existem e rodam honestamente (0 policies/fixtures registradas ainda, reportado como tal — não como sucesso fabricado). `audit:reality` já verifica de verdade branch protection e a IAM role de CI via API. O que falta, com trigger explícito de quando implementar:
+
+```text
+[ ] Custom Semgrep rules EDP001-007 (Scan proibido, chatId cru em log,
+      chamada direta ao Telegram fora do provider, redirect inseguro,
+      wildcard IAM em código, payload de provider vazando ao domínio,
+      HTML perigoso sem sanitizer) → trigger: quando o módulo
+      correspondente (matcher, dispatcher, tracking, connectors) tiver o
+      primeiro código real
+[ ] OPA/Rego (ou equivalente) para policy-as-code de Terraform (POL-IAM-001
+      wildcard, POL-DDB-001 PITR em prod, POL-SQS-001 DLQ obrigatória,
+      POL-LAMBDA-001 Function URL pública proibida, POL-LOG-001 retenção
+      explícita, POL-TAGS-001 tags obrigatórias, POL-SECRETS-001 Secrets
+      Manager) → trigger: quando o primeiro Terraform de recurso de
+      produto (DynamoDB/SQS/Lambda) for adicionado
+[ ] Architecture Fitness Functions (matcher não importa PII, Ticketmaster
+      só em connectors/ticketmaster, Telegram só em
+      notifications/providers/telegram) → trigger: quando
+      services/matching, services/notification e connectors/ticketmaster
+      tiverem o primeiro arquivo real
+[ ] Control Integrity Tests (fixtures valid/invalid provando que cada
+      policy acima detecta a violação) → trigger: nasce junto com cada
+      policy/fixture, nunca depois
+[ ] Reality audit expandida (GuardDuty, CloudTrail, PITR, Lambda
+      concurrency, SQS DLQ attached, Cognito, log retention) → trigger:
+      quando os recursos AWS correspondentes existirem (a maioria depende
+      de Tier B / primeiro ambiente dev implantado)
+[ ] Infra drift detection agendado (terraform plan -detailed-exitcode
+      nightly) → trigger: quando houver Terraform de produto suficiente
+      para drift ser um risco real (hoje só a IAM role de CI existe)
+[ ] Provider Contract Audit agendado (TMDB/Ticketmaster canaries) →
+      trigger: quando os connectors tiverem o primeiro código real
+[ ] Auditoria semanal dos próprios controles (control-integrity roda todas
+      as fixtures inválidas) → trigger: quando houver ao menos uma policy
+      real registrada
+[ ] Quality Rule Registry (docs/engineering/quality-rules.md) expandido
+      conforme cada item acima ganhar enforcement real — nunca listar lá
+      antes do mecanismo existir
+```
+
+## Bootstrap pendente (ver `docs/engineering/quality-strategy.md` §15)
 
 Explicitamente fora do escopo da Phase 0 (`docs/operations/phase-0-kickoff-prompt.md` §5) — depende de ambiente dev implantado, que ainda não existe.
 
