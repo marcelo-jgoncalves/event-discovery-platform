@@ -94,30 +94,109 @@ Adiado explicitamente (não esquecimento — ver `docs/architecture/spec-identit
       HTTP ainda (nenhum consumidor real além deste spec)
 ```
 
-## Quality enforcement system (ver ADR-011, `docs/engineering/quality-enforcement-system.md`)
+## Phase 2 — Catalog (2026-08-12): concluído (com itens explicitamente adiados abaixo)
 
-Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run quality:check`, `quality:self-test`, `audit:reality`, `audit:project`) já existem. A partir da Phase 1 (Identity), `quality:check`/`quality:self-test` deixaram de reportar "0 policies" — ver QR-012/QR-013 em `docs/engineering/quality-rules.md`. `audit:reality` já verifica de verdade branch protection e a IAM role de CI via API. O que falta, com trigger explícito de quando implementar:
+Ver `docs/architecture/spec-catalog.md` e ADR-013 para o registro completo das decisões.
 
 ```text
-[ ] Custom Semgrep rules EDP001-003, EDP005-007 (Scan proibido, chamada
+[x] spec-catalog.md: schema de CatalogTable (Work/Event, WORKTITLE# e
+      REVIEW#UNRESOLVED como itens companheiros em vez de GSI), fluxo
+      Ingestion SQS -> normalizer -> CatalogTable, evento
+      catalog.event.normalized.v1, provider contract (ADR-006), entity
+      resolution nível 1/2 (ADR-002)
+[x] ADR-013 (schema de CatalogTable, título como companion item em vez de
+      GSI, review queue, ingestion SQS único) aceito antes de qualquer
+      Terraform/código de catalog (CLAUDE.md Nível 6) — não reabre ADR-002
+      nem ADR-006, implementa em cima deles
+[x] Terraform: CatalogTable (DynamoDB) + fila edp-{env}-ingestion + DLQ +
+      IAM role de mínimo privilégio (infrastructure/terraform/modules/catalog/)
+      — terraform fmt/validate verificados localmente (init -backend=false)
+[x] packages/provider-contracts (ProviderConnector, RawSourceEvent — zero
+      dependência, compartilhado pelos dois connectors e por services/catalog)
+[x] connectors/tmdb e connectors/ticketmaster: cliente HTTP mínimo cada,
+      implementando ProviderConnector, sem lógica de domínio (o
+      normalizador em services/catalog é o único lugar que interpreta o
+      payload de cada provider — ADR-002 anti-corruption layer)
+[x] services/catalog: normalização TMDB->Work e Ticketmaster->Event,
+      resolução de entidade nível 2 (título normalizado, pura/testável sem
+      I/O), persistência em CatalogTable, emissão de
+      catalog.event.normalized.v1 (structured log, sem fila/tópico
+      dedicado ainda — sem segundo consumidor real)
+[x] Testes unit (normalização, normalizeTitle, resolveWorkForEvent — 11
+      testes em services/catalog, mais os connectors) e integration-local
+      (DynamoDB Local, CatalogTableRepository) — unit verificados rodando
+      (11/11 catalog + 3/3 ticketmaster + 2/2 tmdb, todos pass);
+      integration verificado por leitura de código e por seguir o mesmo
+      padrão do CI (.github/workflows/ci.yml job integration-fast), mas
+      não executado localmente nesta sessão por falta de Docker no
+      ambiente de execução — mesma limitação já registrada na Phase 1
+[x] Architecture Fitness Function QR-014 (nenhum módulo fora de
+      connectors/tmdb / connectors/ticketmaster referencia o host de API
+      do provider correspondente) — fixture inválida e válida
+      comprovadas via `npm run quality:self-test` antes de promover a
+      regra a quality-rules.md
+[x] Semgrep custom rule QR-015 (EDP005 — no direct provider call fora do
+      connector) — fixture inválida e válida comprovadas via
+      `semgrep --error` localmente (exit 1 / exit 0) antes de promover a
+      regra; wired em .github/workflows/security.yml (já escaneia
+      quality/policies/code/ — sem mudança de CI necessária)
+[x] `npm run quality:self-test` — 8/8 controles operacionais (QR-012 a
+      QR-015) verificado localmente
+[x] Drift corrigido: "Bootstrap pendente" afirmava ADR-001 a ADR-009
+      pendentes de criação; já existiam todos — linha corrigida (ver
+      acima)
+```
+
+Adiado explicitamente (não esquecimento — ver `docs/architecture/spec-catalog.md` §1/§8 e ADR-013):
+
+```text
+[ ] Matching / InterestIndexTable (consumo de catalog.event.normalized.v1) →
+      Phase 3
+[ ] Consumo/limpeza da review queue REVIEW#UNRESOLVED → Phase 3+, quando
+      existir um operador/processo real para revisar itens ambíguos
+[ ] Entity resolution fuzzy/IA (nível 3-4 de ADR-002) → trigger: ADR-002
+      (volume real de UNRESOLVED)
+[ ] Venue como entidade própria com tabela/access pattern dedicado →
+      quando um access pattern real precisar (hoje só venueId bruto do
+      Ticketmaster, sem tabela)
+[ ] S3 Raw Archive / replay de payload → quando houver um incidente real
+      que precise de replay (arquitetura-v1.md §10 documentado como
+      caminho de evolução, não implementado nesta fase)
+[ ] Coleta incremental (cursor/watermark/hash de payload,
+      history-v1.md §9) → quando volume real justificar; coleta desta
+      fase é janela simples, sem cursor persistido
+[ ] Scheduler/Lambda de invocação automática dos connectors → depende de
+      Tier B / CD real (ver "Bootstrap pendente")
+[ ] Teste de integração dos connectors contra a API real do TMDB/
+      Ticketmaster → Tier B, quando existir ambiente dev com credenciais
+[ ] AI Enrichment (ADR-005 já existe, implementação é phase própria)
+```
+
+## Quality enforcement system (ver ADR-011, `docs/engineering/quality-enforcement-system.md`)
+
+Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run quality:check`, `quality:self-test`, `audit:reality`, `audit:project`) já existem. A partir da Phase 1 (Identity), `quality:check`/`quality:self-test` deixaram de reportar "0 policies" — ver QR-012/QR-013 em `docs/engineering/quality-rules.md`. A Phase 2 (Catalog) adicionou QR-014/QR-015 (provider boundary — ver abaixo, item marcado feito). `audit:reality` já verifica de verdade branch protection e a IAM role de CI via API. O que falta, com trigger explícito de quando implementar:
+
+```text
+[ ] Custom Semgrep rules EDP001-003, EDP006-007 (Scan proibido, chamada
       direta ao Telegram fora do provider, redirect inseguro, wildcard IAM
-      em código, payload de provider vazando ao domínio, HTML perigoso sem
-      sanitizer) → trigger: quando o módulo correspondente (matcher,
-      dispatcher, tracking, connectors) tiver o primeiro código real
-      (EDP004 — raw PII log — já implementado, ver QR-013)
+      em código, HTML perigoso sem sanitizer) → trigger: quando o módulo
+      correspondente (matcher, dispatcher, tracking) tiver o primeiro
+      código real (EDP004 — raw PII log — já implementado, ver QR-013;
+      EDP005 — direct provider call — já implementado, ver QR-015)
 [ ] OPA/Rego (ou equivalente) para policy-as-code de Terraform (POL-IAM-001
       wildcard, POL-DDB-001 PITR em prod, POL-SQS-001 DLQ obrigatória,
       POL-LAMBDA-001 Function URL pública proibida, POL-LOG-001 retenção
       explícita, POL-TAGS-001 tags obrigatórias, POL-SECRETS-001 Secrets
       Manager) → trigger: quando o primeiro Terraform de recurso de
-      produto (DynamoDB/SQS/Lambda) for adicionado (identity já existe;
-      próximo trigger real é catalog/matching/notification)
-[ ] Architecture Fitness Functions adicionais (Ticketmaster só em
-      connectors/ticketmaster, Telegram só em
-      notifications/providers/telegram) → trigger: quando
-      services/matching, services/notification e connectors/ticketmaster
-      tiverem o primeiro arquivo real (no-external-pii-import — identity —
-      já implementado, ver QR-012)
+      produto (DynamoDB/SQS/Lambda) for adicionado — identity e catalog já
+      existem sem OPA/Rego (revisão manual do plano/diff usada até aqui,
+      ver QR-005/QR-008); próximo trigger real é matching/notification, ou
+      revisitar agora se um incidente real de infra insegura ocorrer antes
+[x] Architecture Fitness Functions adicionais — Ticketmaster/TMDB só em
+      connectors/ticketmaster e connectors/tmdb respectivamente: feito na
+      Phase 2 (QR-014, `no-external-provider-call.mjs`). Ainda pendente:
+      Telegram só em notifications/providers/telegram → trigger:
+      services/notification ter o primeiro arquivo real
 [ ] Control Integrity Tests adicionais → trigger: nasce junto com cada
       policy/fixture nova, nunca depois (padrão já seguido em QR-012/QR-013)
 [ ] Reality audit expandida (GuardDuty, CloudTrail, PITR, Lambda
@@ -149,9 +228,14 @@ Explicitamente fora do escopo da Phase 0 (`docs/operations/phase-0-kickoff-promp
       arquiteturalmente significativa, merece ADR próprio quando chegar
       (ver ADR-010, trigger de revisão)
 [ ] CloudTrail + GuardDuty no primeiro ambiente AWS
-[ ] Formalizar os ADRs consolidados just-in-time, antes da implementação
-      do componente afetado (docs/engineering/decisions/) — ADR-001 a
-      ADR-009 continuam pendentes de criação; ADR-010 já existe
+[x] Formalizar os ADRs consolidados just-in-time, antes da implementação
+      do componente afetado (docs/engineering/decisions/) — CORRIGIDO
+      2026-08-12 (Phase 2 session): esta linha afirmava que ADR-001 a
+      ADR-009 continuavam pendentes de criação; verificado que já existiam
+      todos em docs/engineering/decisions/ (drift entre este backlog e a
+      realidade do repositório — o backlog estava desatualizado, não o
+      código; corrigido aqui em vez de ignorado em silêncio, protocolo de
+      drift de CLAUDE.md/system-overview.md)
 [ ] Testes de regra de negócio crítica (quality-strategy.md §3) como
       primeiro E2E
 [ ] Dashboards de SLO (Match/Delivery Latency, queue age) antes do
