@@ -117,6 +117,20 @@ data "aws_iam_policy_document" "ci" {
     resources = [data.aws_iam_openid_connect_provider.github.arn]
   }
 
+  # The `aws_iam_openid_connect_provider` data source resolves by URL, not
+  # ARN — it lists providers first before it can GetOpenIDConnectProvider,
+  # which is what CI's own `terraform plan` does to read this data source.
+  # This action isn't resource-scopable (IAM ignores a Resource other than
+  # "*" for List* calls), so it's granted at "*" — read-only, no console/data
+  # exposure beyond the list of OIDC provider ARNs already visible via
+  # `aws iam list-open-id-connect-providers`.
+  statement {
+    sid       = "IamListOidcProviders"
+    effect    = "Allow"
+    actions   = ["iam:ListOpenIDConnectProviders"]
+    resources = ["*"]
+  }
+
   statement {
     sid       = "StsIdentity"
     effect    = "Allow"
