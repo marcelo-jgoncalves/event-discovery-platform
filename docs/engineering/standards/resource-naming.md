@@ -195,6 +195,20 @@ edp-dev-api-public
 edp-dev-api-admin
 ```
 
+## 10.1 Cognito
+
+Gap identificado em `spec-identity.md` (Phase 1): este documento não cobria Cognito antes. Segue o padrão geral §3 (`edp-{env}-{component}-{purpose}`), sem regra especial:
+
+```text
+edp-{env}-{component}-user-pool
+edp-{env}-{component}-app-client
+```
+
+```text
+edp-dev-identity-user-pool
+edp-dev-identity-app-client
+```
+
 ## 11. Terraform
 
 Nome do **resource block** no Terraform (`resource "aws_dynamodb_table" "this" {...}`) é sempre `this` quando o módulo representa um único recurso desse tipo, ou o nome lógico em `snake_case` quando o módulo cria múltiplos (`interest_index`, `catalog`). O **atributo `name`** dentro do resource segue as convenções acima (§4-10). Não confundir os dois — o nome do resource block é identificador Terraform interno, não aparece na AWS.
