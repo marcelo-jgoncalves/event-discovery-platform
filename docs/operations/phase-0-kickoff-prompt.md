@@ -1,10 +1,12 @@
 ---
-status: active
+status: done
 owner: architecture
-authority: normative
+authority: historical
 ---
 
 # Prompt de Kickoff — Phase 0 (Foundations)
+
+> **Executado em 2026-08-11.** Este prompt cumpriu seu papel (produzir a fundação operacional) e agora é registro histórico do que foi pedido, não instrução ativa — não editar o corpo abaixo para refletir o que de fato aconteceu. O resultado real (o que foi implementado, as decisões tomadas, os desvios do plano original) está em `docs/backlog.md` (seção "Phase 0 — Foundations") e ADR-010/ADR-011. Se uma futura Phase 0-like session for necessária para outro projeto, copiar o padrão a partir daqueles registros, não deste prompt sozinho — ele contém pelo menos um erro conhecido (o padrão OIDC referenciado no §2 tinha uma trust policy incorreta para o formato atual de `sub` do GitHub, corrigido em ADR-010 §2).
 
 Prompt para colar no início da próxima sessão, onde a implementação começa de fato. Cobre a fundação operacional (repositório, CI/CD, IAM) antes da primeira feature.
 

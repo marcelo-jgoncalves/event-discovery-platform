@@ -141,4 +141,4 @@ WhatsApp, Push, Email                         → trigger: ADR-006 (segundo cana
 
 ## Dívida técnica conhecida
 
-_(vazio — projeto ainda não iniciou implementação. Preencher conforme surgir, seguindo o padrão: item + causa + decisão de adiar + condição de retomada.)_
+_(vazio — nenhum código de produto implementado ainda, só fundação de CI/CD/IaC (Phase 0) e o esqueleto do sistema de qualidade. Preencher conforme surgir, seguindo o padrão: item + causa + decisão de adiar + condição de retomada.)_

@@ -79,8 +79,9 @@ docs/engineering/
   decisions/
     README.md                               Índice de ADRs + regra de
                                              imutabilidade/supersede
-    adr-NNN-*.md                            Decisions (9 ADRs consolidados
-                                             por componente)
+    adr-NNN-*.md                            Decisions (ADRs consolidados
+                                             por componente, ver README.md
+                                             do índice para a contagem atual)
   audits/                                   Evidence — vazio até a primeira
                                              auditoria rodar
 
