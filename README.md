@@ -37,21 +37,43 @@ docs/
       resource-naming.md           nomes/tags de todo recurso AWS (DynamoDB,
                                     SQS, Lambda, S3, IAM, CloudWatch)
     decisions/
-      README.md                    índice dos 9 ADRs + lifecycle (accepted é imutável;
+      README.md                    índice dos ADRs + lifecycle (accepted é imutável;
                                     mudança gera novo ADR que supersede o anterior)
       adr-NNN-*.md
     audits/                        evidência do que foi verificado (vazio até a
                                     primeira auditoria)
+    quality-enforcement-system.md  sistema de enforcement independente de IA
+                                    (policy-as-code, fitness functions, reality
+                                    audits) — ver ADR-011
+    quality-rules.md               registry de regras com enforcement real
+                                    (nada aspiracional listado aqui)
 
   backlog.md                       itens adiados por decisão consciente — trigger
                                     referencia o spec/ADR, nunca duplica o valor
   context-strategy.md              o desenho do próprio sistema de contexto (meta)
   api/                             contratos de API (vazio)
   operations/
-    phase-0-kickoff-prompt.md      prompt para a sessão que inicia a
-                                    implementação (repo, OIDC/CI, Tier A)
+    phase-0-kickoff-prompt.md      prompt da sessão que criou a fundação
+                                    operacional (repo, OIDC/CI Tier A) —
+                                    executado em 2026-08-11, registro histórico
   runbooks/                        (vazio)
 ```
+
+## Sistema de qualidade executável
+
+```
+quality/
+  policies/       regras executáveis por domínio (vazio — nasce junto com o
+                   primeiro código que cada policy protege, ver ADR-011)
+  tests/fixtures/  valid/ e invalid/: prova de que cada policy detecta a
+                   violação que diz detectar
+  audits/          achados de auditoria contra estado real
+  scripts/         quality-check.mjs, quality-self-test.mjs, audit-reality.mjs
+                   (já verifica branch protection + IAM role via API),
+                   audit-project.mjs
+```
+
+Comandos: `npm run quality:check`, `npm run quality:self-test`, `npm run audit:reality`, `npm run audit:project`.
 
 ## Estrutura de código
 
@@ -82,4 +104,21 @@ infrastructure/
   terraform/
 ```
 
-Nada implementado ainda — apenas a estrutura de pastas e o sistema de contexto (arquitetura, especificações, glossário, ADRs, padrões, estratégia de qualidade) alinhados ao padrão de engenharia auditado no blog (`../auditoria-padrao-qualidade-marcelo-goncalves-blog.md`) e refinados por uma revisão de engenharia de contexto (canonicalidade, context routing, authority matrix — ver `docs/context-strategy.md`). Próxima sessão: `docs/operations/phase-0-kickoff-prompt.md` (repositório, OIDC/CI Tier A) — depois, checklist de bootstrap completo em `docs/engineering/quality-strategy.md` §13.
+## Estado atual
+
+Nenhum código de produto implementado ainda (`apps/`, `services/`, `connectors/`, `packages/` seguem vazios) — o que existe é a fundação operacional (Phase 0, concluída em 2026-08-11) e o sistema de contexto (arquitetura, especificações, glossário, ADRs, padrões, estratégia de qualidade), alinhados ao padrão de engenharia auditado no blog (`../auditoria-padrao-qualidade-marcelo-goncalves-blog.md`) e refinados por uma revisão de engenharia de contexto (canonicalidade, context routing, authority matrix — ver `docs/context-strategy.md`).
+
+```text
+[x] Repositório: github.com/marcelo-jgoncalves/event-discovery-platform
+      (público — branch protection completa exige Pro para repo privado
+      em conta pessoal, ver ADR-010)
+[x] CI Tier A rodando de verdade em PR/push (typecheck, lint, unit,
+      integration-fast, dependency review, npm audit, Semgrep, Gitleaks,
+      terraform validate/plan, TFLint, Trivy IaC)
+[x] IAM role de CI via OIDC (Terraform), least-privilege, escopada a edp-*
+[x] Sistema de enforcement de qualidade independente de IA (esqueleto +
+      2 scripts com verificação real: ADR-011)
+[ ] Primeira feature de produto — próximo passo em aberto
+```
+
+Checklist de bootstrap completo (o que falta e por quê): `docs/engineering/quality-strategy.md` §15 e `docs/backlog.md`.
