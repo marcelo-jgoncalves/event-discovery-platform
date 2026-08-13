@@ -15,3 +15,11 @@ module "identity" {
 
   environment = var.environment
 }
+
+# Phase 2 — Catalog (spec-catalog.md, ADR-013): CatalogTable + shared
+# ingestion SQS queue for the TMDB/Ticketmaster connectors.
+module "catalog" {
+  source = "./modules/catalog"
+
+  environment = var.environment
+}

@@ -6,6 +6,7 @@
 // to docs/engineering/quality-rules.md until this script proves it.
 import { spawnSync } from 'node:child_process';
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
+import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
 
 let operational = 0;
 let total = 0;
@@ -36,6 +37,27 @@ function report(name, ok, detail) {
   );
   report(
     'no-external-pii-import accepts valid fixture',
+    validViolations.length === 0,
+    `${validViolations.length} violation(s) found`,
+  );
+}
+
+// --- Control: no-external-provider-call (architecture fitness function) ---
+{
+  const invalidViolations = checkNoExternalProviderCall(
+    'quality/tests/fixtures/invalid/architecture/provider-isolation',
+  );
+  report(
+    'no-external-provider-call rejects invalid fixture',
+    invalidViolations.length > 0,
+    `${invalidViolations.length} violation(s) found`,
+  );
+
+  const validViolations = checkNoExternalProviderCall(
+    'quality/tests/fixtures/valid/architecture/provider-isolation',
+  );
+  report(
+    'no-external-provider-call accepts valid fixture',
     validViolations.length === 0,
     `${validViolations.length} violation(s) found`,
   );
@@ -87,6 +109,55 @@ function report(name, ok, detail) {
     );
   } else {
     report('EDP004 accepts valid fixture', valid.status === 0, `semgrep exit code ${valid.status}`);
+  }
+}
+
+// --- Control: EDP005 (Semgrep — no direct provider call outside connectors) ---
+{
+  const semgrepBase = [
+    'scan',
+    '--config',
+    'quality/policies/code/edp005-no-direct-provider-call.yaml',
+    '--error',
+    '--quiet',
+  ];
+
+  const invalid = spawnSync(
+    'semgrep',
+    [...semgrepBase, 'quality/tests/fixtures/invalid/code/edp005-direct-provider-call.ts'],
+    {
+      encoding: 'utf8',
+    },
+  );
+  if (invalid.error) {
+    report(
+      'EDP005 rejects invalid fixture',
+      false,
+      'semgrep not available locally — install to verify',
+    );
+  } else {
+    report(
+      'EDP005 rejects invalid fixture',
+      invalid.status === 1,
+      `semgrep exit code ${invalid.status}`,
+    );
+  }
+
+  const valid = spawnSync(
+    'semgrep',
+    [...semgrepBase, 'quality/tests/fixtures/valid/code/edp005-provider-call-via-connector.ts'],
+    {
+      encoding: 'utf8',
+    },
+  );
+  if (valid.error) {
+    report(
+      'EDP005 accepts valid fixture',
+      false,
+      'semgrep not available locally — install to verify',
+    );
+  } else {
+    report('EDP005 accepts valid fixture', valid.status === 0, `semgrep exit code ${valid.status}`);
   }
 }
 
