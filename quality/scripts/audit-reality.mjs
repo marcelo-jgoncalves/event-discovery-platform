@@ -75,9 +75,7 @@ check('required status checks configured on main (strict, exact Tier A set)', ()
   const missing = [...expected].filter((c) => !actual.has(c));
   const unexpected = [...actual].filter((c) => !expected.has(c));
   if (missing.length > 0 || unexpected.length > 0) {
-    throw new Error(
-      `missing: [${missing.join(', ')}], unexpected: [${unexpected.join(', ')}]`,
-    );
+    throw new Error(`missing: [${missing.join(', ')}], unexpected: [${unexpected.join(', ')}]`);
   }
   return `strict=true, ${actual.size} required context(s) match Tier A exactly`;
 });

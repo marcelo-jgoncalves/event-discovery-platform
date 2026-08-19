@@ -36,7 +36,8 @@ export function checkBrokenLinks(mdFiles, baseDir) {
     const content = readFileSync(file, 'utf8');
     for (const match of content.matchAll(linkPattern)) {
       const target = match[1].split('#')[0];
-      if (!target || target.startsWith('http://') || target.startsWith('https://') || target === '') continue;
+      if (!target || target.startsWith('http://') || target.startsWith('https://') || target === '')
+        continue;
       const resolved = resolve(dirname(file), target);
       if (!existsSync(resolved)) {
         failures.push(`broken link — ${relative(baseDir, file)} -> ${target}`);
@@ -55,10 +56,12 @@ export function checkAdrIndex(decisionsDir) {
 
   const failures = [];
   for (const id of new Set(adrIdsOnDisk)) {
-    if (!adrIdsInReadme.includes(id)) failures.push(`ADR-${id} exists on disk but is not referenced in README.md`);
+    if (!adrIdsInReadme.includes(id))
+      failures.push(`ADR-${id} exists on disk but is not referenced in README.md`);
   }
   for (const id of new Set(adrIdsInReadme)) {
-    if (!adrIdsOnDisk.includes(id)) failures.push(`ADR-${id} referenced in README.md but has no file on disk`);
+    if (!adrIdsOnDisk.includes(id))
+      failures.push(`ADR-${id} referenced in README.md but has no file on disk`);
   }
   for (const [id, count] of countBy(adrIdsOnDisk)) {
     if (count > 1) failures.push(`ADR-${id} has ${count} files on disk (duplicate number)`);
@@ -80,11 +83,19 @@ function countBy(items) {
 // importing these functions from quality-self-test.mjs doesn't also run
 // this pass against the real repo as a side effect.
 const isDirectRun =
-  process.argv[1] && process.argv[1].replace(/\\/g, '/').endsWith('quality/scripts/context-check.mjs');
+  process.argv[1] &&
+  process.argv[1].replace(/\\/g, '/').endsWith('quality/scripts/context-check.mjs');
 if (isDirectRun) {
-  const ROOT = resolve(new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), '../..');
+  const ROOT = resolve(
+    new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'),
+    '../..',
+  );
   const docsDir = join(ROOT, 'docs');
-  const rootFiles = [join(ROOT, 'CLAUDE.md'), join(ROOT, 'AGENTS.md'), join(ROOT, 'README.md')].filter(existsSync);
+  const rootFiles = [
+    join(ROOT, 'CLAUDE.md'),
+    join(ROOT, 'AGENTS.md'),
+    join(ROOT, 'README.md'),
+  ].filter(existsSync);
   const mdFiles = [...collectMarkdownFiles(docsDir), ...rootFiles];
 
   let failures = 0;

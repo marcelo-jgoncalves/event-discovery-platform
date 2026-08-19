@@ -1,0 +1,19 @@
+title = "event-discovery-platform gitleaks config"
+
+# Extends the default gitleaks ruleset (all built-in rules stay active) —
+# this file only adds a narrow allowlist for confirmed false positives, it
+# never disables or weakens a real detection rule.
+[extend]
+useDefault = true
+
+[allowlist]
+  description = "Prose false positives — reviewed, not real secrets"
+  regexTarget = "line"
+  regexes = [
+    # "secret scanning" as a supply-chain hygiene practice, in the
+    # Dependency & Supply-Chain Hygiene criterion definition
+    # (docs/engineering/standards/joint-review-criteria.md) — the
+    # generic-api-key rule's entropy heuristic false-positives on this
+    # phrase in Portuguese prose. Not a credential.
+    '''vulnerabilidade, secret scanning, SBOM''',
+  ]

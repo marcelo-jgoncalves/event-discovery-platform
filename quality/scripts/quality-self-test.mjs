@@ -112,20 +112,38 @@ function report(name, ok, detail) {
 {
   const invalidDir = 'quality/tests/fixtures/invalid/context/links';
   const invalidFailures = checkBrokenLinks(collectMarkdownFiles(invalidDir), invalidDir);
-  report('context-check (links) rejects invalid fixture', invalidFailures.length > 0, `${invalidFailures.length} violation(s) found`);
+  report(
+    'context-check (links) rejects invalid fixture',
+    invalidFailures.length > 0,
+    `${invalidFailures.length} violation(s) found`,
+  );
 
   const validDir = 'quality/tests/fixtures/valid/context/links';
   const validFailures = checkBrokenLinks(collectMarkdownFiles(validDir), validDir);
-  report('context-check (links) accepts valid fixture', validFailures.length === 0, `${validFailures.length} violation(s) found`);
+  report(
+    'context-check (links) accepts valid fixture',
+    validFailures.length === 0,
+    `${validFailures.length} violation(s) found`,
+  );
 }
 
 // --- Control: context-check ADR index (QR-021) ---
 {
-  const invalidFailures = checkAdrIndex('quality/tests/fixtures/invalid/context/adr-index/decisions');
-  report('context-check (ADR index) rejects invalid fixture', invalidFailures.length > 0, `${invalidFailures.length} violation(s) found`);
+  const invalidFailures = checkAdrIndex(
+    'quality/tests/fixtures/invalid/context/adr-index/decisions',
+  );
+  report(
+    'context-check (ADR index) rejects invalid fixture',
+    invalidFailures.length > 0,
+    `${invalidFailures.length} violation(s) found`,
+  );
 
   const validFailures = checkAdrIndex('quality/tests/fixtures/valid/context/adr-index/decisions');
-  report('context-check (ADR index) accepts valid fixture', validFailures.length === 0, `${validFailures.length} violation(s) found`);
+  report(
+    'context-check (ADR index) accepts valid fixture',
+    validFailures.length === 0,
+    `${validFailures.length} violation(s) found`,
+  );
 }
 
 // --- Control: EDP004 (Semgrep — raw PII in logs) ---

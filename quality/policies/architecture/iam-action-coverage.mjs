@@ -56,7 +56,10 @@ function extractRequiredActions(sourceDir) {
       const prefix = IAM_PREFIX_BY_PACKAGE[pkg];
       if (!prefix) continue;
       for (const rawName of names.split(',')) {
-        const name = rawName.trim().split(/\s+as\s+/)[0].trim();
+        const name = rawName
+          .trim()
+          .split(/\s+as\s+/)[0]
+          .trim();
         if (!name.endsWith('Command')) continue;
         const action = name.slice(0, -'Command'.length);
         if (!actionsByPrefix.has(prefix)) actionsByPrefix.set(prefix, new Set());
