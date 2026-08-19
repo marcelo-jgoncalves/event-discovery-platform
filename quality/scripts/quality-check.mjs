@@ -7,11 +7,12 @@
 // job (.github/workflows/security.yml), not duplicated here.
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
 import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
+import { checkIamActionCoverage } from '../policies/architecture/iam-action-coverage.mjs';
 import { checkWorkspaceScriptsDeclared } from '../policies/github/workspace-scripts-declared.mjs';
 
 let failed = false;
 let passed = 0;
-const total = 3;
+const total = 4;
 
 const piiViolations = checkNoExternalPiiImport(process.cwd());
 if (piiViolations.length > 0) {
@@ -35,6 +36,20 @@ if (providerViolations.length > 0) {
 } else {
   passed += 1;
   console.log('[quality-check] no-external-provider-call: OK');
+}
+
+const iamViolations = checkIamActionCoverage(process.cwd());
+if (iamViolations.length > 0) {
+  failed = true;
+  console.error('[quality-check] iam-action-coverage: VIOLATIONS FOUND');
+  for (const v of iamViolations) {
+    console.error(
+      `  services/${v.service} calls an SDK command requiring "${v.action}", not granted in infrastructure/terraform/modules/${v.service}/`,
+    );
+  }
+} else {
+  passed += 1;
+  console.log('[quality-check] iam-action-coverage: OK');
 }
 
 const scriptViolations = checkWorkspaceScriptsDeclared(process.cwd());

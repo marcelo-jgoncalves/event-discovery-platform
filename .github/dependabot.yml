@@ -3,10 +3,7 @@ updates:
   # npm workspaces: security updates immediately (one PR per advisory);
   # version updates grouped weekly to avoid PR noise, per
   # docs/engineering/quality-strategy.md §1.2 ("Dependabot security updates
-  # habilitado; version updates agrupados e revisados"). This file was
-  # missing until the engineering-quality review (2026-08-19) found the
-  # doc/code drift: the strategy document claimed Dependabot was enabled,
-  # but no config existed.
+  # habilitado; version updates agrupados e revisados").
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:

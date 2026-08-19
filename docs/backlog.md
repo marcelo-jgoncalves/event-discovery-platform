@@ -204,13 +204,24 @@ Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run qual
       quando os recursos AWS correspondentes existirem (a maioria depende
       de Tier B / primeiro ambiente dev implantado)
 [ ] Infra drift detection agendado (terraform plan -detailed-exitcode
-      nightly) → trigger: quando houver Terraform de produto suficiente
-      para drift ser um risco real (hoje só a IAM role de CI existe)
+      nightly) → trigger DISPARADO (revisão de qualidade de engenharia,
+      2026-08-19, achado do Codex): Terraform de produto real já existe
+      (`infrastructure/terraform/modules/identity`, `.../catalog`), não
+      mais só a IAM role de CI — item ainda não implementado, permanece
+      aqui como dívida reconhecida até o primeiro ambiente dev implantado
+      tornar um job nightly executável de forma útil
 [ ] Provider Contract Audit agendado (TMDB/Ticketmaster canaries) →
-      trigger: quando os connectors tiverem o primeiro código real
+      trigger DISPARADO desde a Phase 2 (connectors/tmdb e
+      connectors/ticketmaster têm código real, ver `npm run
+      quality:self-test` QR-014/QR-015) — item ainda não implementado,
+      permanece aqui como dívida reconhecida (achado do Codex, revisão de
+      qualidade de engenharia 2026-08-19)
 [ ] Auditoria semanal dos próprios controles (control-integrity roda todas
-      as fixtures inválidas) → trigger: quando houver ao menos uma policy
-      real registrada
+      as fixtures inválidas) → trigger DISPARADO desde QR-012 (Phase 1);
+      `npm run quality:self-test` roda no CI a cada PR (QR-017) mas ainda
+      não há execução agendada independente de PR — item ainda não
+      implementado, permanece aqui como dívida reconhecida (achado do
+      Codex, revisão de qualidade de engenharia 2026-08-19)
 [ ] Quality Rule Registry (docs/engineering/quality-rules.md) expandido
       conforme cada item acima ganhar enforcement real — nunca listar lá
       antes do mecanismo existir

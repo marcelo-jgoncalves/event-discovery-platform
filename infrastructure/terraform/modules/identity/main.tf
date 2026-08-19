@@ -181,10 +181,11 @@ data "aws_iam_policy_document" "identity_service" {
       "cognito-idp:ForgotPassword",
       "cognito-idp:ConfirmForgotPassword",
       // signup.ts compensates a failed UsersTable transact write by deleting
-      // the just-created Cognito user (engineering-quality review) — without
-      // this action that cleanup call fails with AccessDenied and is
-      // swallowed by design (best-effort), silently leaving the orphaned
-      // account the compensation was meant to prevent.
+      // the just-created Cognito user — without this action that cleanup
+      // call fails with AccessDenied and is swallowed by design
+      // (best-effort), silently leaving the orphaned account the
+      // compensation was meant to prevent. Cross-checked against
+      // cognito-client.ts by quality/policies/architecture/iam-action-coverage.mjs.
       "cognito-idp:AdminDeleteUser",
     ]
     resources = [aws_cognito_user_pool.this.arn]

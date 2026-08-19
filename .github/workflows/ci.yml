@@ -65,11 +65,10 @@ jobs:
       - name: Architecture fitness functions
         run: node quality/scripts/quality-check.mjs
 
-      # quality-rules.md QR-012/QR-013/QR-014/QR-015 evidence depends on
-      # this proving invalid fixtures are still rejected and valid ones
-      # still accepted — was only ever run manually before this review
-      # (engineering-quality review, 2026-08-19), so a degraded custom
-      # control could merge while everything else stayed green.
+      # quality-rules.md QR-012/QR-013/QR-014/QR-015/QR-016 evidence depends
+      # on this proving invalid fixtures are still rejected and valid ones
+      # still accepted. Without this gate a degraded custom control could
+      # merge while everything else stayed green.
       - name: Quality control self-test (fixture-based)
         run: npm run quality:self-test
 

@@ -7,6 +7,7 @@
 import { spawnSync } from 'node:child_process';
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
 import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
+import { checkIamActionCoverage } from '../policies/architecture/iam-action-coverage.mjs';
 import { checkWorkspaceScriptsDeclared } from '../policies/github/workspace-scripts-declared.mjs';
 
 let operational = 0;
@@ -59,6 +60,27 @@ function report(name, ok, detail) {
   );
   report(
     'no-external-provider-call accepts valid fixture',
+    validViolations.length === 0,
+    `${validViolations.length} violation(s) found`,
+  );
+}
+
+// --- Control: iam-action-coverage (architecture fitness function) ---
+{
+  const invalidViolations = checkIamActionCoverage(
+    'quality/tests/fixtures/invalid/architecture/iam-action-coverage',
+  );
+  report(
+    'iam-action-coverage rejects invalid fixture',
+    invalidViolations.length > 0,
+    `${invalidViolations.length} violation(s) found`,
+  );
+
+  const validViolations = checkIamActionCoverage(
+    'quality/tests/fixtures/valid/architecture/iam-action-coverage',
+  );
+  report(
+    'iam-action-coverage accepts valid fixture',
     validViolations.length === 0,
     `${validViolations.length} violation(s) found`,
   );
