@@ -109,7 +109,7 @@ infrastructure/
 
 ## Estado atual
 
-Phase 1 (Identity) e Phase 2 (Catalog) implementadas: `services/identity` (signup/login, Cognito + UsersTable) e `services/catalog` (ingestão TMDB/Ticketmaster, CatalogTable) são código de produto real, com `connectors/tmdb` e `connectors/ticketmaster`. `apps/`, `services/ingestion`, `services/matching`, `services/notifications`, `services/tracking` e a maior parte de `packages/` seguem vazios — próximas fases. A fundação operacional (Phase 0, concluída em 2026-08-11) e o sistema de contexto (arquitetura, especificações, glossário, ADRs, padrões, estratégia de qualidade) seguem alinhados ao padrão de engenharia auditado no blog (`../auditoria-padrao-qualidade-marcelo-goncalves-blog.md`) e refinados por uma revisão de engenharia de contexto (canonicalidade, context routing, authority matrix — ver `docs/context-strategy.md`). Duas revisões conjuntas Claude/Codex já concluídas: arquitetura (~8.2/10, `docs/engineering/audits/2026-08-19-joint-architecture-review.md`) e qualidade de engenharia (`docs/engineering/audits/2026-08-19-joint-engineering-quality-review.md`).
+Phase 1 (Identity) e Phase 2 (Catalog) implementadas: `services/identity` (signup/login, Cognito + UsersTable) e `services/catalog` (ingestão TMDB/Ticketmaster, CatalogTable) são código de produto real, com `connectors/tmdb` e `connectors/ticketmaster`. `apps/`, `services/ingestion`, `services/matching`, `services/notifications`, `services/tracking` e a maior parte de `packages/` seguem vazios — próximas fases. A fundação operacional (Phase 0, concluída em 2026-08-11) e o sistema de contexto (arquitetura, especificações, glossário, ADRs, padrões, estratégia de qualidade) seguem alinhados ao padrão de engenharia auditado no blog (`../auditoria-padrao-qualidade-marcelo-goncalves-blog.md`) e refinados por uma revisão de engenharia de contexto (canonicalidade, context routing, authority matrix — ver `docs/context-strategy.md`). Três revisões conjuntas Claude/Codex já concluídas (protocolo em `AGENTS.md` §2, critérios em `docs/engineering/standards/joint-review-criteria.md`): arquitetura (~8.2/10, `docs/engineering/audits/2026-08-19-joint-architecture-review.md`), qualidade de engenharia (~8.5/10, `docs/engineering/audits/2026-08-19-joint-engineering-quality-review.md`) e engenharia de contexto (~8.6-8.7/10, `docs/engineering/audits/2026-08-19-joint-context-engineering-review.md`) — esta última também deu origem a `npm run context:check` (QR-021), agora gate de CI.
 
 ```text
 [x] Repositório: github.com/marcelo-jgoncalves/event-discovery-platform
@@ -128,8 +128,11 @@ Phase 1 (Identity) e Phase 2 (Catalog) implementadas: `services/identity` (signu
 [x] Phase 2 — Catalog: spec-catalog.md, ADR-013, Terraform (CatalogTable),
       services/catalog (ingest TMDB/Ticketmaster, work resolution),
       connectors/tmdb + connectors/ticketmaster, quality-rules QR-014/QR-015
-[x] Revisão conjunta Claude/Codex de arquitetura (2026-08-19, ~8.2/10) e de
-      qualidade de engenharia (2026-08-19) — ver docs/engineering/audits/
+[x] Três revisões conjuntas Claude/Codex (2026-08-19): arquitetura (~8.2/10),
+      qualidade de engenharia (~8.5/10), engenharia de contexto (~8.6-8.7/10)
+      — ver docs/engineering/audits/ e docs/engineering/standards/
+      joint-review-criteria.md; achados reais corrigidos a cada rodada,
+      não só re-pontuados
 [ ] Phase 3 (Matching/Delivery) — próximo passo em aberto
 ```
 
