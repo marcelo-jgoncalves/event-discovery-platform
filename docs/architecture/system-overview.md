@@ -147,6 +147,9 @@ Enforcement independente de
   IA (policy-as-code, fitness
   functions, reality audits)  → quality-enforcement-system.md, quality-rules.md, ADR-011
 Resource naming / tagging     → docs/engineering/standards/resource-naming.md
+CI/CD (OIDC role, Tier A,
+  terraform apply)             → ADR-010, ADR-015 (supersede ADR-014),
+                                  .github/workflows/{ci,cd}.yml
 ```
 
 ## Contexto efêmero — o que nunca vira documento canônico
