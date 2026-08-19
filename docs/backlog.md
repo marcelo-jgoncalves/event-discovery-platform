@@ -312,7 +312,31 @@ Corrigido em 2026-08-19 (revisão conjunta Claude/Codex de arquitetura, ver `AGE
 [ ] Telemetria operacional real (alarmes de DLQ/queue depth, retenção de
       log explícita, dashboards) para Identity/Catalog → Phase 1-2 têm
       apenas structured console.log; trigger: primeiro ambiente dev
-      implantado com CloudWatch real
+      implantado com CloudWatch real. Decisão consciente de não
+      implementar alarme/log-retention via Terraform antes disso (mesmo
+      sendo tecnicamente possível como IaC declarada): sem canal de
+      notificação operacional decidido (SNS/email/Telegram-para-Marcelo)
+      e sem worker de ingestão rodando ainda, um alarme sem destinatário
+      é infraestrutura de fachada — avaliação independente de Claude e
+      Codex na revisão de 2026-08-19 (ver
+      docs/engineering/audits/2026-08-19-joint-architecture-review.md)
+[ ] Concorrência otimista (version/condition check) em putWork/putEvent
+      → hoje o padrão é read-then-transact sem condição amarrando a
+      leitura à escrita; duas re-ingestões concorrentes do mesmo
+      canonicalId com estados derivados diferentes (título normalizado
+      diferente, ou uma UNRESOLVED enquanto outra já resolvida) podem
+      corromper o item companion. Risco real mas não evidenciado hoje
+      (SQS entrega no-mínimo-uma-vez, mas sem worker de ingestão rodando
+      ainda não há concorrência real observada) — achado do Codex,
+      revisão de 2026-08-19. Trigger: implementar antes de habilitar
+      ingestão paralela para o mesmo provider/entidade, o mais tardar
+      durante os testes de carga/falha da Phase 3, ou imediatamente se
+      métricas revelarem processamento sobreposto do mesmo canonicalId.
+      Ao implementar: persistir timestamp/revisão da observação da fonte,
+      rejeitar observações mais antigas que a armazenada, usar
+      condition/version no item de metadata, reler e recalcular os itens
+      companion em caso de conflito, testar transições concorrentes de
+      título e de resolução divergentes
 [ ] AWS budgets / cost alarms → nenhum configurado ainda; trigger: antes
       do primeiro tráfego real de produção (ver também item já registrado
       em "Bootstrap pendente" sobre dashboards de SLO)
