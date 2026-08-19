@@ -1,0 +1,41 @@
+name: Nightly Quality Control Self-Test
+
+# Tier C-style scheduled check (quality-strategy.md §1.1): proves the custom
+# controls (architecture fitness functions, EDP004/EDP005 Semgrep rules)
+# still detect their invalid fixture and still accept their valid one, even
+# on a day with no PR to trigger the same check inside ci.yml's verify job.
+# A degraded control that quietly stops detecting its violation would
+# otherwise only be caught the next time someone happens to open a PR.
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # 06:00 UTC daily
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '24'
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  quality-self-test:
+    name: Quality control self-test (fixture-based)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies (npm workspaces)
+        run: npm ci
+
+      - name: Install Semgrep (EDP004/EDP005 fixture checks)
+        run: pip install semgrep==1.99.0
+
+      - name: Quality control self-test
+        run: npm run quality:self-test

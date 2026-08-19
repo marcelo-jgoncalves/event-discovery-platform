@@ -216,12 +216,12 @@ Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run qual
       quality:self-test` QR-014/QR-015) — item ainda não implementado,
       permanece aqui como dívida reconhecida (achado do Codex, revisão de
       qualidade de engenharia 2026-08-19)
-[ ] Auditoria semanal dos próprios controles (control-integrity roda todas
-      as fixtures inválidas) → trigger DISPARADO desde QR-012 (Phase 1);
-      `npm run quality:self-test` roda no CI a cada PR (QR-017) mas ainda
-      não há execução agendada independente de PR — item ainda não
-      implementado, permanece aqui como dívida reconhecida (achado do
-      Codex, revisão de qualidade de engenharia 2026-08-19)
+[x] Auditoria semanal dos próprios controles (control-integrity roda todas
+      as fixtures inválidas) — CORRIGIDO 2026-08-19 (revisão de qualidade
+      de engenharia): `.github/workflows/nightly-quality-self-test.yml`
+      roda `quality:self-test` diariamente (mais forte que semanal),
+      independente de atividade de PR — soma-se ao QR-017 (mesmo comando
+      já rodava a cada PR)
 [ ] Quality Rule Registry (docs/engineering/quality-rules.md) expandido
       conforme cada item acima ganhar enforcement real — nunca listar lá
       antes do mecanismo existir

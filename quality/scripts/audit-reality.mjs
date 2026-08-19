@@ -35,37 +35,51 @@ check('branch protection enabled on main', () => {
 // exists is not proof it stays configured — a later manual change to branch
 // protection would silently drop this back to "documented but not enforced"
 // with no code-level signal. Re-verified on every audit-reality run instead
-// of once at fix time. Minimum expected count is the 7 Tier A jobs (verify,
-// integration-fast, dependency-review, npm-audit, security-scans's semgrep +
-// gitleaks, infra) — grows if Tier A grows, never shrinks silently.
-check('required status checks configured on main (strict, >=7 contexts)', () => {
+// of once at fix time. Checks the exact context names, not just a count —
+// count alone would pass if 7 unrelated/stale contexts replaced a real Tier
+// A job. This list must be updated by hand when a Tier A job is renamed or
+// added/removed in .github/workflows/ci.yml — there is no way to derive the
+// live GitHub check names from the YAML job names alone (security-scans's
+// sub-jobs report as "<parent job name> / <sub-job name>").
+const EXPECTED_REQUIRED_CONTEXTS = [
+  'Verify (typecheck, lint, format, unit)',
+  'Integration (fast, DynamoDB Local)',
+  'Dependency Review',
+  'npm audit (high/critical)',
+  'Security Scans (Semgrep + Gitleaks) / SAST (Semgrep)',
+  'Security Scans (Semgrep + Gitleaks) / Secret Detection (Gitleaks)',
+  'Validate Infra (Terraform + TFLint + Trivy)',
+];
+
+check('required status checks configured on main (strict, exact Tier A set)', () => {
   const strict = execFileSync(
     'gh',
-    [
-      'api',
-      `repos/${REPO}/branches/main/protection/required_status_checks`,
-      '--jq',
-      '.strict',
-    ],
+    ['api', `repos/${REPO}/branches/main/protection/required_status_checks`, '--jq', '.strict'],
     { encoding: 'utf8' },
   ).trim();
   if (strict !== 'true') throw new Error(`strict=${strict}, expected true`);
 
-  const contextsJson = execFileSync(
+  const contextsOut = execFileSync(
     'gh',
     [
       'api',
       `repos/${REPO}/branches/main/protection/required_status_checks`,
       '--jq',
-      '.contexts // .checks | length',
+      '.contexts // .checks',
     ],
     { encoding: 'utf8' },
   ).trim();
-  const count = Number(contextsJson);
-  if (!Number.isFinite(count) || count < 7) {
-    throw new Error(`${count} required context(s), expected >= 7`);
+  const actual = new Set(JSON.parse(contextsOut));
+  const expected = new Set(EXPECTED_REQUIRED_CONTEXTS);
+
+  const missing = [...expected].filter((c) => !actual.has(c));
+  const unexpected = [...actual].filter((c) => !expected.has(c));
+  if (missing.length > 0 || unexpected.length > 0) {
+    throw new Error(
+      `missing: [${missing.join(', ')}], unexpected: [${unexpected.join(', ')}]`,
+    );
   }
-  return `strict=true, ${count} required context(s)`;
+  return `strict=true, ${actual.size} required context(s) match Tier A exactly`;
 });
 
 check('IAM role for CI OIDC exists', () => {

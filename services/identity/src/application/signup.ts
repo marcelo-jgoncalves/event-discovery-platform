@@ -54,8 +54,20 @@ export async function signup(
     await deps.usersTable.putProfileAndConsent(profile, consent);
   } catch (err) {
     // Best-effort: the original DynamoDB failure is the one the caller
-    // needs to see and retry on, not a secondary Cognito cleanup failure.
-    await deps.cognito.deleteUser(parsed.email).catch(() => undefined);
+    // needs to see and retry on, not a secondary Cognito cleanup failure —
+    // but a failed cleanup leaves an orphaned Cognito account that nothing
+    // else will ever detect, so it must be observable somewhere. Logs
+    // userId (opaque Cognito sub), never the email (EDP004 — no raw PII in
+    // logs, code-conventions.md).
+    await deps.cognito.deleteUser(parsed.email).catch((cleanupErr: unknown) => {
+      console.error(
+        JSON.stringify({
+          event: 'signup.compensation_failed',
+          userId,
+          reason: cleanupErr instanceof Error ? cleanupErr.message : String(cleanupErr),
+        }),
+      );
+    });
     throw err;
   }
 
