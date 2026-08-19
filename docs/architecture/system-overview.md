@@ -79,6 +79,14 @@ Registrar/revisar decisão de qualidade (CI, gates, exceção)
      mudança envolver um novo mecanismo de enforcement (não só um gate
      dentro de um mecanismo já existente)
 
+Rodar/participar de uma revisão conjunta Claude↔Codex (eixo novo ou rodada)
+  1. CLAUDE.md
+  2. AGENTS.md §2 e §2.1 (protocolo de debate, nota cega, procedimento
+     por eixo) e §3 (invocação do Codex CLI)
+  3. docs/engineering/standards/joint-review-criteria.md (critérios do
+     eixo — não redefinir se já convergido)
+  4. último audit doc fechado do mesmo eixo, se houver rodada anterior
+
 Criar/alterar infraestrutura (Terraform, novo recurso AWS)
   1. CLAUDE.md
   2. spec relevante (nome lógico do recurso)

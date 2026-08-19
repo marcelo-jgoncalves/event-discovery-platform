@@ -32,7 +32,7 @@ Todo documento deste projeto se encaixa em exatamente um papel. Um agente (human
 
 | Papel | Responde a | Onde vive | Muda com que frequência |
 |---|---|---|---|
-| **Agent rules** | "Como eu devo me comportar neste projeto, sempre?" | `CLAUDE.md` | Raramente — só quando o próprio modo de trabalhar muda |
+| **Agent rules** | "Como eu devo me comportar neste projeto, sempre?" | `CLAUDE.md` (regras gerais); `AGENTS.md` (protocolo específico de trabalhar com mais de um agente de IA — Claude Code + Codex CLI — não duplicado em `CLAUDE.md`) | Raramente — só quando o próprio modo de trabalhar muda |
 | **Product intent** | "O que estamos construindo e por quê?" | `docs/product/` | Raramente — muda com pivô de produto, não com feature |
 | **Domain language** | "O que significam nossos conceitos?" | `docs/domain/glossary.md` | Pouco — cresce quando um termo novo entra no domínio |
 | **Architecture/specs** | "Como este subsistema deve funcionar, em detalhe suficiente para implementar?" | `docs/architecture/` | Pouco — só quando o desenho técnico muda de verdade |
@@ -42,6 +42,8 @@ Todo documento deste projeto se encaixa em exatamente um papel. Um agente (human
 | **Operations** | "Como operar/recuperar o sistema?" | `docs/operations/`, `docs/runbooks/` | Conforme o operacional real muda |
 | **Evidence** | "O que foi efetivamente verificado, e quando?" | `docs/engineering/audits/` | A cada auditoria/verificação executada |
 
+Evidence pode ter `authority: normative` no frontmatter sem contradizer o papel: é normativa sobre **o que foi verificado e o que ficou decidido como consequência** (ex.: "estes itens ficam adiados com este trigger") — não sobre desenho de sistema, que continua vivendo em Architecture/Decisions. Se um audit doc e um spec/ADR discordarem sobre desenho, o spec/ADR vence; se discordarem sobre o que uma rodada de revisão concluiu, o audit doc vence.
+
 `docs/architecture/system-overview.md` não é um papel próprio — é o **context router**: mapa de leitura e roteamento, deliberadamente não normativo (ver §4).
 
 ---
@@ -50,6 +52,9 @@ Todo documento deste projeto se encaixa em exatamente um papel. Um agente (human
 
 ```text
 CLAUDE.md                                   Agent rules
+AGENTS.md                                   Agent rules — protocolo
+                                             multiagente (Claude↔Codex),
+                                             não duplicado em CLAUDE.md
 
 docs/product/
   vision.md                                 Product intent
@@ -63,6 +68,8 @@ docs/architecture/
                                              read sets por tarefa, authority
                                              matrix. Não normativo.
   architecture.md                           ÚNICA arquitetura vigente (normativa)
+  spec-identity.md                          Desenho concreto de Identity (Phase 1)
+  spec-catalog.md                           Desenho concreto de Catalog (Phase 2)
   spec-dynamodb-access-patterns.md          Hot path de matching
   spec-notification-delivery.md             Hot path de delivery
   history/
@@ -70,7 +77,14 @@ docs/architecture/
                                              nunca normativo
 
 docs/engineering/
-  quality-strategy.md                       Quality/standards (política)
+  quality-strategy.md                       Quality/standards (política — o
+                                             quê e por quê)
+  quality-rules.md                          Quality/standards (registry —
+                                             cada regra com mecanismo de
+                                             enforcement real, QR-NNN)
+  quality-enforcement-system.md             Quality/standards (como o
+                                             enforcement independente de IA
+                                             funciona, ADR-011)
   standards/
     principles.md                           Por que as regras existem
     code-conventions.md                     Convenções de código

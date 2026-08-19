@@ -275,16 +275,19 @@ Ver `docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md` (P0 já 
 ```text
 [ ] Metadata YAML (status/owner/authority) em todos os documentos de
       docs/, não só nos normativos centrais já cobertos
-[ ] npm run context:check — links quebrados, índice de ADR ↔ arquivos,
-      doc ativo referenciando arquivo superseded, backlog trigger resolve
-      → trigger: > 15 documentos com `authority: normative`, ou a primeira
-      vez que uma referência quebrada/doc superseded passar despercebida
-      por mais de uma sessão (o próprio caso disparou em 2026-08-19: a
-      revisão do eixo "Engenharia de Contexto" achou `context-strategy.md`
-      afirmando `docs/operations/`/`docs/engineering/audits/` "vazios" e
-      a seção "Dívida técnica conhecida" do backlog "deliberadamente
-      vazia" muito depois de deixarem de ser verdade — corrigido nessa
-      revisão, mas nada além de leitura manual pegou o drift)
+[x] npm run context:check — trigger disparou 2026-08-19 (revisão do eixo
+      "Engenharia de Contexto": `context-strategy.md` afirmando
+      `docs/operations/`/`docs/engineering/audits/` "vazios" e a seção
+      "Dívida técnica conhecida" do backlog "deliberadamente vazia" muito
+      depois de deixarem de ser verdade, sem nada além de leitura manual
+      para pegar isso) e foi implementado na mesma revisão: QR-021
+      (`quality/scripts/context-check.mjs`), gate de PR via
+      `npm run context:check` e `npm run audit:project`. Cobre links
+      relativos quebrados e índice ADR↔arquivos (as duas classes
+      mecanicamente verificáveis); doc ativo referenciando arquivo
+      `superseded` e drift de prosa ("X está vazio") continuam exigindo
+      leitura humana/agente — não é um gap novo, é o limite honesto do
+      que este tipo de check consegue detectar sem NLP
 [ ] Lifecycle explícito de docs/engineering/audits/ (quando um achado de
       auditoria é considerado resolvido/arquivado)
 [ ] Definir trigger numérico de migração de docs/backlog.md para issue
@@ -308,12 +311,16 @@ Ver `docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md` (P0 já 
       formato neutro que um terceiro agente adotaria sem adaptação →
       trigger: entrada de um terceiro agente de IA no projeto (mesmo
       trigger que já criou o `AGENTS.md` em primeiro lugar)
-[x] AGENTS.md como contrato agnóstico de IA, com CLAUDE.md como adapter —
-      feito 2026-08-19: Codex CLI passou a atuar como segundo revisor
-      (mesmo padrão já validado no projeto irmão expiration-tracker),
-      trigger observado. AGENTS.md cobre protocolo de debate Claude↔Codex
-      (obrigatório em decisões Nível 6 e mudanças Nível 4-5) e invocação;
-      CLAUDE.md continua fonte primária de regras operacionais
+[x] AGENTS.md como contrato compartilhado pelos dois agentes de IA
+      atualmente em uso (Claude Code + Codex CLI), com CLAUDE.md como
+      adapter — feito 2026-08-19: Codex CLI passou a atuar como segundo
+      revisor (mesmo padrão já validado no projeto irmão
+      expiration-tracker), trigger observado. AGENTS.md cobre protocolo de
+      debate Claude↔Codex (obrigatório em decisões Nível 6 e mudanças
+      Nível 4-5) e invocação; CLAUDE.md continua fonte primária de regras
+      operacionais. Não confundir com portabilidade agnóstica plena — ver
+      item acima ("Portabilidade agnóstica de AGENTS.md declarada mas não
+      plena"), ainda em aberto
 ```
 
 ## Fora do MVP por decisão consciente (não implementar sem trigger)

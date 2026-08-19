@@ -72,6 +72,13 @@ jobs:
       - name: Quality control self-test (fixture-based)
         run: npm run quality:self-test
 
+      # docs/backlog.md "Engenharia de contexto" — context:check trigger
+      # fired 2026-08-19 (stale "vazio" claims in context-strategy.md went
+      # undetected until a manual review caught them); this is the
+      # mechanical half of catching that class of drift on every PR.
+      - name: Context consistency (links, ADR index)
+        run: npm run context:check
+
   # ==============================================================
   # integration-fast: DynamoDB Local / emulated services, no mock of
   # persistence semantics (quality-strategy.md §1.1). Job exists and runs
