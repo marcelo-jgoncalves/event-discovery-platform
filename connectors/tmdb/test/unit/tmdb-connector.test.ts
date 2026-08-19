@@ -27,3 +27,17 @@ test('source() reports tmdb', () => {
   const connector = new TmdbConnector(new TmdbClient('fake-key'));
   assert.equal(connector.source(), 'tmdb');
 });
+
+test('fetchNowPlaying() aborts the request instead of hanging forever on a stalled connection', async () => {
+  const neverResolvingFetch: typeof fetch = (_input, init) =>
+    new Promise((_resolve, reject) => {
+      const signal = init?.signal;
+      signal?.addEventListener('abort', () => reject(new Error('The operation was aborted')));
+    });
+
+  // 1ms timeout: the request never settles on its own, so any completion
+  // (rejection) proves the abort deadline fired, not the fake network.
+  const client = new TmdbClient('fake-key', neverResolvingFetch, undefined, 1);
+
+  await assert.rejects(() => client.fetchNowPlaying());
+});

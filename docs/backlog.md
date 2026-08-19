@@ -204,13 +204,24 @@ Esqueleto de diretórios (`quality/`) e scripts de orquestração (`npm run qual
       quando os recursos AWS correspondentes existirem (a maioria depende
       de Tier B / primeiro ambiente dev implantado)
 [ ] Infra drift detection agendado (terraform plan -detailed-exitcode
-      nightly) → trigger: quando houver Terraform de produto suficiente
-      para drift ser um risco real (hoje só a IAM role de CI existe)
+      nightly) → trigger DISPARADO (revisão de qualidade de engenharia,
+      2026-08-19, achado do Codex): Terraform de produto real já existe
+      (`infrastructure/terraform/modules/identity`, `.../catalog`), não
+      mais só a IAM role de CI — item ainda não implementado, permanece
+      aqui como dívida reconhecida até o primeiro ambiente dev implantado
+      tornar um job nightly executável de forma útil
 [ ] Provider Contract Audit agendado (TMDB/Ticketmaster canaries) →
-      trigger: quando os connectors tiverem o primeiro código real
-[ ] Auditoria semanal dos próprios controles (control-integrity roda todas
-      as fixtures inválidas) → trigger: quando houver ao menos uma policy
-      real registrada
+      trigger DISPARADO desde a Phase 2 (connectors/tmdb e
+      connectors/ticketmaster têm código real, ver `npm run
+      quality:self-test` QR-014/QR-015) — item ainda não implementado,
+      permanece aqui como dívida reconhecida (achado do Codex, revisão de
+      qualidade de engenharia 2026-08-19)
+[x] Auditoria semanal dos próprios controles (control-integrity roda todas
+      as fixtures inválidas) — CORRIGIDO 2026-08-19 (revisão de qualidade
+      de engenharia): `.github/workflows/nightly-quality-self-test.yml`
+      roda `quality:self-test` diariamente (mais forte que semanal),
+      independente de atividade de PR — soma-se ao QR-017 (mesmo comando
+      já rodava a cada PR)
 [ ] Quality Rule Registry (docs/engineering/quality-rules.md) expandido
       conforme cada item acima ganhar enforcement real — nunca listar lá
       antes do mecanismo existir
@@ -244,8 +255,13 @@ Explicitamente fora do escopo da Phase 0 (`docs/operations/phase-0-kickoff-promp
       armazenar o primeiro dado de usuário real
 [ ] Implementar Data Quality invariants + métricas (quality-strategy.md §5.4)
       antes do primeiro evento real poder ficar READY
-[ ] Habilitar Dependabot security updates (Dependency Review já está
-      ativo no Tier A; falta o bot de atualização automática)
+[x] Habilitar Dependabot security updates (Dependency Review já está
+      ativo no Tier A; faltava o bot de atualização automática) — CORRIGIDO
+      2026-08-19 (revisão conjunta Claude/Codex de qualidade de engenharia):
+      `.github/dependabot.yml` criado (npm + github-actions, security
+      updates imediatos, version updates agrupados semanalmente), fechando
+      o drift entre `quality-strategy.md` §1.2 (que já afirmava Dependabot
+      "habilitado") e a ausência real de configuração — achado do Codex
 [ ] Adicionar DAST Tier B e threat model inicial antes do primeiro beta
 [ ] Adicionar axe/Playwright para fluxos críticos do frontend
 [ ] Executar primeiro restore drill antes de considerar backup "validado"
@@ -259,14 +275,60 @@ Ver `docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md` (P0 já 
 ```text
 [ ] Metadata YAML (status/owner/authority) em todos os documentos de
       docs/, não só nos normativos centrais já cobertos
-[ ] npm run context:check — links quebrados, índice de ADR ↔ arquivos,
-      doc ativo referenciando arquivo superseded, backlog trigger resolve
+[x] npm run context:check — trigger disparou 2026-08-19 (revisão do eixo
+      "Engenharia de Contexto": `context-strategy.md` afirmando
+      `docs/operations/`/`docs/engineering/audits/` "vazios" e a seção
+      "Dívida técnica conhecida" do backlog "deliberadamente vazia" muito
+      depois de deixarem de ser verdade, sem nada além de leitura manual
+      para pegar isso) e foi implementado na mesma revisão: QR-021
+      (`quality/scripts/context-check.mjs`), gate de PR via
+      `npm run context:check` e `npm run audit:project`. Cobre links
+      relativos quebrados e índice ADR↔arquivos (as duas classes
+      mecanicamente verificáveis); doc ativo referenciando arquivo
+      `superseded` e drift de prosa ("X está vazio") continuam exigindo
+      leitura humana/agente — não é um gap novo, é o limite honesto do
+      que este tipo de check consegue detectar sem NLP
 [ ] Lifecycle explícito de docs/engineering/audits/ (quando um achado de
-      auditoria é considerado resolvido/arquivado)
+      auditoria é considerado resolvido/arquivado) → trigger: > 8 arquivos
+      normativos em docs/engineering/audits/ (hoje: 4 audit docs +
+      reports/ + snapshots/, abaixo do limiar) ou a primeira vez que um
+      achado antigo for reaberto/repetido sem se saber se a versão
+      anterior contava como resolvida (o que já quase aconteceu nesta
+      revisão — Rodada 2 e 3 do eixo "Engenharia de Contexto" reconfirmam
+      achados de rodadas anteriores, mas o protocolo de rodadas do
+      `AGENTS.md` §2.1 já resolve isso para achados *dentro* de uma
+      revisão; falta só para achados *entre* revisões diferentes)
 [ ] Definir trigger numérico de migração de docs/backlog.md para issue
       tracker (equipe/itens simultâneos acima de N)
-[ ] AGENTS.md como contrato agnóstico de IA, com CLAUDE.md como adapter —
-      só se/quando múltiplos agentes de IA passarem a trabalhar no projeto
+[ ] `docs/operations/` hoje guarda prompts de kickoff de fase encerrados
+      (`phase-0-kickoff-prompt.md`, `phase-1-kickoff-prompt.md`,
+      `status: done`/`authority: historical`), não runbooks — desvio do
+      papel "Operations" definido em `context-strategy.md` §2, já
+      apontado (sem resolução) na auditoria de 2026-08-11 §"papéis que
+      não se encaixam". Achado da revisão conjunta Claude↔Codex do eixo
+      "Engenharia de Contexto" (2026-08-19): mover os arquivos para um
+      local mais correto (ex. `docs/architecture/history/`, mesmo padrão
+      já usado para `architecture-v1.md`) tem custo real — 5+ arquivos
+      referenciam o caminho atual (`README.md`, `docs/backlog.md`, ADR-010,
+      `spec-identity.md`) → trigger: próxima vez que `docs/operations/`
+      ganhar um runbook real (primeiro ambiente implantado) — fazer a
+      reclassificação junto, não antes
+[ ] Portabilidade agnóstica de `AGENTS.md` declarada mas não plena —
+      achado da mesma revisão: o protocolo/invocação em `AGENTS.md` §3 é
+      escrito especificamente para Claude Code + Codex CLI, não um
+      formato neutro que um terceiro agente adotaria sem adaptação →
+      trigger: entrada de um terceiro agente de IA no projeto (mesmo
+      trigger que já criou o `AGENTS.md` em primeiro lugar)
+[x] AGENTS.md como contrato compartilhado pelos dois agentes de IA
+      atualmente em uso (Claude Code + Codex CLI), com CLAUDE.md como
+      adapter — feito 2026-08-19: Codex CLI passou a atuar como segundo
+      revisor (mesmo padrão já validado no projeto irmão
+      expiration-tracker), trigger observado. AGENTS.md cobre protocolo de
+      debate Claude↔Codex (obrigatório em decisões Nível 6 e mudanças
+      Nível 4-5) e invocação; CLAUDE.md continua fonte primária de regras
+      operacionais. Não confundir com portabilidade agnóstica plena — ver
+      item acima ("Portabilidade agnóstica de AGENTS.md declarada mas não
+      plena"), ainda em aberto
 ```
 
 ## Fora do MVP por decisão consciente (não implementar sem trigger)
@@ -291,4 +353,49 @@ WhatsApp, Push, Email                         → trigger: ADR-006 (segundo cana
 
 ## Dívida técnica conhecida
 
-_(vazio — nenhum código de produto implementado ainda, só fundação de CI/CD/IaC (Phase 0) e o esqueleto do sistema de qualidade. Preencher conforme surgir, seguindo o padrão: item + causa + decisão de adiar + condição de retomada.)_
+Corrigido em 2026-08-19 (revisão conjunta Claude/Codex de arquitetura, ver `AGENTS.md` §2): esta seção afirmava "nenhum código de produto implementado ainda", desatualizado desde a Phase 1 (2026-08-11) — drift de documentação, não de código (protocolo de `system-overview.md`). Itens reais identificados nessa revisão, já corrigidos no mesmo dia: escritas não-atômicas em signup (profile+consent) e catalog (Work+WORKTITLE, Event+REVIEW) — agora `TransactWriteItems`; `createdAt` sobrescrito em re-ingestão; item `WORKTITLE#`/`REVIEW#` obsoleto não removido em mudança de título/resolução; payloads de provider validados só por type-cast TypeScript, sem schema runtime (agora Zod, `tmdb-normalizer.ts`/`ticketmaster-normalizer.ts`); `startAt` do Ticketmaster ausente virava silenciosamente `now()` em vez de rejeitar o registro; `security.yml` rodava Semgrep/Gitleaks duas vezes por PR (trigger `pull_request` próprio + chamada via `ci.yml`).
+
+```text
+[ ] Publicação de evento (catalog.event.normalized.v1) via console.log,
+      sem outbox/handoff durável → aceito conscientemente até existir um
+      segundo consumidor real (Matcher, Phase 3) — trigger: início da
+      Phase 3, ver architecture.md §2 e spec-catalog.md §8.5
+[ ] Testes de integração (DynamoDB Local) nunca executados localmente
+      nesta revisão nem nas anteriores, por falta de Docker no ambiente de
+      execução — dependem do mesmo padrão que já roda em CI
+      (integration-fast); risco residual: mudanças nos repositórios
+      transacionais desta revisão foram verificadas por leitura de código
+      e por unit tests, não por execução real do integration test novo
+      contra DynamoDB Local
+[ ] Telemetria operacional real (alarmes de DLQ/queue depth, retenção de
+      log explícita, dashboards) para Identity/Catalog → Phase 1-2 têm
+      apenas structured console.log; trigger: primeiro ambiente dev
+      implantado com CloudWatch real. Decisão consciente de não
+      implementar alarme/log-retention via Terraform antes disso (mesmo
+      sendo tecnicamente possível como IaC declarada): sem canal de
+      notificação operacional decidido (SNS/email/Telegram-para-Marcelo)
+      e sem worker de ingestão rodando ainda, um alarme sem destinatário
+      é infraestrutura de fachada — avaliação independente de Claude e
+      Codex na revisão de 2026-08-19 (ver
+      docs/engineering/audits/2026-08-19-joint-architecture-review.md)
+[ ] Concorrência otimista (version/condition check) em putWork/putEvent
+      → hoje o padrão é read-then-transact sem condição amarrando a
+      leitura à escrita; duas re-ingestões concorrentes do mesmo
+      canonicalId com estados derivados diferentes (título normalizado
+      diferente, ou uma UNRESOLVED enquanto outra já resolvida) podem
+      corromper o item companion. Risco real mas não evidenciado hoje
+      (SQS entrega no-mínimo-uma-vez, mas sem worker de ingestão rodando
+      ainda não há concorrência real observada) — achado do Codex,
+      revisão de 2026-08-19. Trigger: implementar antes de habilitar
+      ingestão paralela para o mesmo provider/entidade, o mais tardar
+      durante os testes de carga/falha da Phase 3, ou imediatamente se
+      métricas revelarem processamento sobreposto do mesmo canonicalId.
+      Ao implementar: persistir timestamp/revisão da observação da fonte,
+      rejeitar observações mais antigas que a armazenada, usar
+      condition/version no item de metadata, reler e recalcular os itens
+      companion em caso de conflito, testar transições concorrentes de
+      título e de resolução divergentes
+[ ] AWS budgets / cost alarms → nenhum configurado ainda; trigger: antes
+      do primeiro tráfego real de produção (ver também item já registrado
+      em "Bootstrap pendente" sobre dashboards de SLO)
+```

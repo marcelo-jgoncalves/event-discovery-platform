@@ -31,6 +31,55 @@ check('branch protection enabled on main', () => {
   return 'enforce_admins=true';
 });
 
+// PCA-20260812-001: a one-time gh-cli confirmation that required_status_checks
+// exists is not proof it stays configured — a later manual change to branch
+// protection would silently drop this back to "documented but not enforced"
+// with no code-level signal. Re-verified on every audit-reality run instead
+// of once at fix time. Checks the exact context names, not just a count —
+// count alone would pass if 7 unrelated/stale contexts replaced a real Tier
+// A job. This list must be updated by hand when a Tier A job is renamed or
+// added/removed in .github/workflows/ci.yml — there is no way to derive the
+// live GitHub check names from the YAML job names alone (security-scans's
+// sub-jobs report as "<parent job name> / <sub-job name>").
+const EXPECTED_REQUIRED_CONTEXTS = [
+  'Verify (typecheck, lint, format, unit)',
+  'Integration (fast, DynamoDB Local)',
+  'Dependency Review',
+  'npm audit (high/critical)',
+  'Security Scans (Semgrep + Gitleaks) / SAST (Semgrep)',
+  'Security Scans (Semgrep + Gitleaks) / Secret Detection (Gitleaks)',
+  'Validate Infra (Terraform + TFLint + Trivy)',
+];
+
+check('required status checks configured on main (strict, exact Tier A set)', () => {
+  const strict = execFileSync(
+    'gh',
+    ['api', `repos/${REPO}/branches/main/protection/required_status_checks`, '--jq', '.strict'],
+    { encoding: 'utf8' },
+  ).trim();
+  if (strict !== 'true') throw new Error(`strict=${strict}, expected true`);
+
+  const contextsOut = execFileSync(
+    'gh',
+    [
+      'api',
+      `repos/${REPO}/branches/main/protection/required_status_checks`,
+      '--jq',
+      '.contexts // .checks',
+    ],
+    { encoding: 'utf8' },
+  ).trim();
+  const actual = new Set(JSON.parse(contextsOut));
+  const expected = new Set(EXPECTED_REQUIRED_CONTEXTS);
+
+  const missing = [...expected].filter((c) => !actual.has(c));
+  const unexpected = [...actual].filter((c) => !expected.has(c));
+  if (missing.length > 0 || unexpected.length > 0) {
+    throw new Error(`missing: [${missing.join(', ')}], unexpected: [${unexpected.join(', ')}]`);
+  }
+  return `strict=true, ${actual.size} required context(s) match Tier A exactly`;
+});
+
 check('IAM role for CI OIDC exists', () => {
   const out = execFileSync(
     'aws',

@@ -1,4 +1,5 @@
 import {
+  AdminDeleteUserCommand,
   CognitoIdentityProviderClient,
   ConfirmSignUpCommand,
   InitiateAuthCommand,
@@ -25,6 +26,11 @@ export interface CognitoAuthClient {
   signUp(email: string, password: string): Promise<SignUpResult>;
   confirmSignUp(email: string, confirmationCode: string): Promise<void>;
   login(email: string, password: string): Promise<AuthTokens>;
+  // Compensating action for signup.ts: if UsersTable.putProfileAndConsent
+  // fails after Cognito already created the account, the caller deletes the
+  // Cognito user so a retried signup with the same email doesn't hit
+  // UsernameExistsException against an account with no profile/consent.
+  deleteUser(email: string): Promise<void>;
 }
 
 export interface CognitoAuthClientConfig {
@@ -124,5 +130,11 @@ export class AwsCognitoAuthClient implements CognitoAuthClient {
       idToken: result.IdToken,
       refreshToken: result.RefreshToken,
     };
+  }
+
+  async deleteUser(email: string): Promise<void> {
+    await this.client.send(
+      new AdminDeleteUserCommand({ UserPoolId: this.config.userPoolId, Username: email }),
+    );
   }
 }

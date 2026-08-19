@@ -97,6 +97,11 @@ data "aws_iam_policy_document" "catalog_service" {
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
       "dynamodb:Query",
+      // putWork/putEvent commit metadata + companion item (WORKTITLE#/
+      // REVIEW#UNRESOLVED) via TransactWriteItems (2026-08-19 architecture
+      // review) — without this action the transactional write fails with
+      // AccessDenied at runtime.
+      "dynamodb:TransactWriteItems",
     ]
     resources = [aws_dynamodb_table.catalog.arn]
   }

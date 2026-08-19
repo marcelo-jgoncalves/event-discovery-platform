@@ -21,6 +21,7 @@
     "quality:check": "npm run verify && node quality/scripts/quality-check.mjs",
     "quality:self-test": "node quality/scripts/quality-self-test.mjs",
     "audit:reality": "node quality/scripts/audit-reality.mjs",
+    "context:check": "node quality/scripts/context-check.mjs",
     "audit:project": "node quality/scripts/audit-project.mjs"
   },
   "devDependencies": {

@@ -626,7 +626,10 @@ Registry de regras com enforcement real (não aspiracional): `docs/engineering/q
       de armazenar o primeiro dado de usuário real
 [ ] Implementar Data Quality invariants + métricas (seção 5.4) antes do
       primeiro evento real poder ficar READY
-[ ] Habilitar Dependabot + Dependency Review e pin de Node/package manager
+[x] Habilitar Dependabot + Dependency Review e pin de Node/package manager
+      — CORRIGIDO 2026-08-19 (revisão de qualidade de engenharia):
+      `.github/dependabot.yml` criado; Dependency Review e pin de
+      Node/npm já existiam (`.github/workflows/ci.yml`, `.nvmrc`, `.npmrc`)
 [ ] Adicionar DAST Tier B e threat model inicial antes do primeiro beta
 [ ] Adicionar axe/Playwright para fluxos críticos do frontend
 [ ] Executar primeiro restore drill antes de considerar backup "validado"

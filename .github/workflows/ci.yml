@@ -65,11 +65,35 @@ jobs:
       - name: Architecture fitness functions
         run: node quality/scripts/quality-check.mjs
 
+      # EDP004/EDP005 (quality-self-test.mjs) shell out to the semgrep CLI —
+      # pinned to match security.yml's SAST job exactly, so both jobs run
+      # the same rule engine version against the same fixtures. Without
+      # this, self-test silently reports those two controls as FAIL
+      # ("semgrep not available locally") instead of proving them, which is
+      # exactly the false-confidence gap this gate exists to prevent.
+      - name: Install Semgrep
+        run: pip install semgrep==1.99.0
+
+      # quality-rules.md QR-012/QR-013/QR-014/QR-015/QR-016/QR-021 evidence
+      # depends on this proving invalid fixtures are still rejected and
+      # valid ones still accepted. Without this gate a degraded custom
+      # control could merge while everything else stayed green.
+      - name: Quality control self-test (fixture-based)
+        run: npm run quality:self-test
+
+      # docs/backlog.md "Engenharia de contexto" — context:check trigger
+      # fired 2026-08-19 (stale "vazio" claims in context-strategy.md went
+      # undetected until a manual review caught them); this is the
+      # mechanical half of catching that class of drift on every PR.
+      - name: Context consistency (links, ADR index)
+        run: npm run context:check
+
   # ==============================================================
   # integration-fast: DynamoDB Local / emulated services, no mock of
-  # persistence semantics (quality-strategy.md §1.1). No workspace defines
-  # test:integration yet — job exists and runs against the emulator from
-  # commit zero regardless, per the phase-0 kickoff instruction.
+  # persistence semantics (quality-strategy.md §1.1). Job exists and runs
+  # against the emulator from commit zero regardless of whether any
+  # workspace defines test:integration yet, per the phase-0 kickoff
+  # instruction — Identity and Catalog both define it as of Phase 1-2.
   # ==============================================================
   integration-fast:
     name: Integration (fast, DynamoDB Local)

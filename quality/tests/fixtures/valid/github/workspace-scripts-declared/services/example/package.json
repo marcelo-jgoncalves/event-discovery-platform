@@ -1,0 +1,9 @@
+{
+  "name": "@edp/fixture-example",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "node --test test/unit/**/*.test.ts"
+  }
+}

@@ -1,0 +1,187 @@
+# Snapshot de notas — auditoria de consistência do projeto.
+# Fonte canônica das regras: metodologia do projeto irmão marcelo-goncalves-blog
+# (docs/engineering/audits/project-consistency-audit.md), aplicada aqui por
+# docs/engineering/quality-strategy.md §9. Nunca editar este arquivo depois de
+# gerado; cada execução futura cria um snapshot novo.
+
+schema_version: 1
+audit_id: PCA-20260812-FULL
+date: 2026-08-12
+mode: full
+area: null
+
+repository:
+  branch: worktree-agent-a86c9cb615d6675c0
+  commit: 1c85fce03801ff99f4874f3659ca90801c808524
+  working_tree_clean: true
+
+methodology:
+  version: 1
+  weights_version: 1
+
+overall:
+  score: 6.5
+  confidence: medium
+  verdict: >
+    Funcional, mas com lacunas importantes. Primeiro ciclo de auditoria deste
+    projeto, sem baseline comparável. As duas fases de produto implementadas
+    (Identity, Catalog) mostram alinhamento real e verificado ao vivo entre
+    backlog e estado real (contagens de teste, controles de qualidade,
+    branch protection). O maior limitador do veredito é ci_cd/security:
+    nenhum required status check configurado no GitHub para main, apesar de
+    quality-enforcement-system.md §24 exigir isso explicitamente
+    (PCA-20260812-001) — a nota ponderada isolada (6.5) não deve ser lida
+    sem essa ressalva.
+
+areas:
+  architecture:
+    score: 7
+    status: assessed
+    confidence: medium-high
+    evidence:
+      - path: docs/architecture/system-overview.md
+        observation: context router não referencia spec-identity.md nem spec-catalog.md
+        evidence_type: direct-documentation
+      - path: docs/architecture/spec-catalog.md
+        observation: spec concreto e vigente do subsistema de ingestion, não citado pelo router
+        evidence_type: direct-documentation
+    limitations:
+      - "architecture.md (1408 linhas) e history/architecture-v1.md não lidos linha a linha"
+    findings:
+      - PCA-20260812-003
+  infrastructure_as_code:
+    score: 8
+    status: assessed
+    confidence: medium
+    evidence:
+      - path: infrastructure/terraform/providers.tf
+        observation: default_tags cobre Project/Environment/ManagedBy/Owner; módulos adicionam Component — 5 tags obrigatórias de resource-naming.md §12 satisfeitas
+        evidence_type: direct-config
+      - path: infrastructure/terraform/modules/identity/main.tf
+        observation: PITR habilitado, IAM least-privilege por role funcional, naming convention seguida
+        evidence_type: direct-config
+    limitations:
+      - "sem terraform plan/apply contra AWS real nesta sessão (sem credenciais)"
+    findings: []
+  ci_cd:
+    score: 5
+    status: assessed
+    confidence: high
+    evidence:
+      - path: .github/workflows/ci.yml
+        observation: 9 checks reais, verdes nos últimos 5 runs de main
+        evidence_type: automated-check
+      - path: (GitHub API) branches/main/protection/required_status_checks
+        observation: "404 - not enabled"
+        evidence_type: external-verification
+    limitations: []
+    findings:
+      - PCA-20260812-001
+      - PCA-20260812-002
+  security:
+    score: 6
+    status: assessed
+    confidence: medium
+    evidence:
+      - path: services/identity/src/pii/cognito-client.ts
+        observation: único módulo com acesso a PII bruta, boundary protegido por fitness function comprovada
+        evidence_type: direct-code
+      - path: (npm run quality:self-test)
+        observation: "8/8 controls operational"
+        evidence_type: automated-check
+    limitations:
+      - "GuardDuty/CloudTrail/Cognito real não verificáveis (sem AWS real)"
+      - "threat model formal só passou a existir nesta sessão (documento separado)"
+    findings:
+      - PCA-20260812-001
+  tests:
+    score: 6
+    status: assessed
+    confidence: medium
+    evidence:
+      - path: (npm run test, executado ao vivo nesta sessão)
+        observation: "26 unit tests pass (11 catalog + 10 identity + 3 ticketmaster + 2 tmdb), contagens idênticas às afirmadas em docs/backlog.md"
+        evidence_type: automated-check
+    limitations:
+      - "testes de integração não executados localmente (sem Docker); evidência via CI real (gh run list), não execução direta nesta sessão"
+    findings: []
+  application_code:
+    score: 8
+    status: assessed
+    confidence: medium-high
+    evidence:
+      - path: services/catalog/src/application/ingest-ticketmaster-event.ts
+        observation: separação domain/pii/infra/application consistente com spec-catalog.md
+        evidence_type: direct-code
+    limitations:
+      - "amostragem, não leitura de 100% dos arquivos de código"
+    findings: []
+  contracts_and_monorepo:
+    score: 7
+    status: assessed
+    confidence: medium
+    evidence:
+      - path: packages/provider-contracts/package.json
+        observation: pacote mínimo, sem dependências, consumido por ambos connectors e services/catalog
+        evidence_type: direct-code
+      - path: (npm ci, executado nesta sessão)
+        observation: "157 pacotes resolvidos, 0 vulnerabilidades, workspaces linkados corretamente"
+        evidence_type: automated-check
+    limitations: []
+    findings: []
+  documentation:
+    score: 6
+    status: assessed
+    confidence: high
+    evidence:
+      - path: docs/engineering/quality-strategy.md
+        observation: "linha 420 referencia docs/adr/ como alternativa não usada no projeto"
+        evidence_type: direct-documentation
+    limitations: []
+    findings:
+      - PCA-20260812-003
+      - PCA-20260812-004
+  production_readiness:
+    score: 3
+    status: assessed
+    confidence: high
+    evidence:
+      - path: docs/backlog.md
+        observation: "Tier B/C, ambiente dev implantado, GuardDuty/CloudTrail, dashboards de SLO explicitamente adiados e declarados"
+        evidence_type: direct-documentation
+    limitations:
+      - "nota baixa é esperada e honestamente documentada pelo próprio projeto nesta fase"
+    findings: []
+  context_and_ai_governance:
+    score: 8
+    status: assessed
+    confidence: high
+    evidence:
+      - path: CLAUDE.md
+        observation: regras duráveis apenas, seção explícita do que não vai ali, regra de contexto efêmero
+        evidence_type: direct-documentation
+      - path: docs/domain/glossary.md
+        observation: existe, aplicado da revisão de contexto de 2026-08-11
+        evidence_type: direct-documentation
+    limitations: []
+    findings:
+      - PCA-20260812-003
+
+comparison:
+  baseline_snapshot: null
+  comparable: false
+  notes: >
+    Primeiro ciclo desta metodologia neste projeto. Não há snapshot anterior
+    comparável. docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md
+    existe mas audita estratégia de contexto com rubrica diferente, não é
+    baseline comparável para este schema.
+
+critical_findings: []
+high_findings:
+  - PCA-20260812-001
+limitations:
+  - "sem credenciais AWS neste ambiente — GuardDuty, CloudTrail, PITR observado, estado real de Cognito/DynamoDB não verificados"
+  - "testes de integração não executados localmente (sem Docker) — evidência via CI real, não execução direta"
+  - "architecture.md e history/architecture-v1.md não lidos linha a linha (1408+ linhas)"
+  - "code-conventions.md, testing-strategy.md, git-and-review-workflow.md, principles.md confirmados existentes mas não lidos integralmente"
+  - "QR-001 (Actions pinadas por SHA) verificado por leitura visual, não por check automatizado"

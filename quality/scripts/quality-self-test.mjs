@@ -7,6 +7,9 @@
 import { spawnSync } from 'node:child_process';
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
 import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
+import { checkIamActionCoverage } from '../policies/architecture/iam-action-coverage.mjs';
+import { checkWorkspaceScriptsDeclared } from '../policies/github/workspace-scripts-declared.mjs';
+import { collectMarkdownFiles, checkBrokenLinks, checkAdrIndex } from './context-check.mjs';
 
 let operational = 0;
 let total = 0;
@@ -60,6 +63,86 @@ function report(name, ok, detail) {
     'no-external-provider-call accepts valid fixture',
     validViolations.length === 0,
     `${validViolations.length} violation(s) found`,
+  );
+}
+
+// --- Control: iam-action-coverage (architecture fitness function) ---
+{
+  const invalidViolations = checkIamActionCoverage(
+    'quality/tests/fixtures/invalid/architecture/iam-action-coverage',
+  );
+  report(
+    'iam-action-coverage rejects invalid fixture',
+    invalidViolations.length > 0,
+    `${invalidViolations.length} violation(s) found`,
+  );
+
+  const validViolations = checkIamActionCoverage(
+    'quality/tests/fixtures/valid/architecture/iam-action-coverage',
+  );
+  report(
+    'iam-action-coverage accepts valid fixture',
+    validViolations.length === 0,
+    `${validViolations.length} violation(s) found`,
+  );
+}
+
+// --- Control: workspace-scripts-declared (process fitness function) ---
+{
+  const invalidViolations = checkWorkspaceScriptsDeclared(
+    'quality/tests/fixtures/invalid/github/workspace-scripts-declared',
+  );
+  report(
+    'workspace-scripts-declared rejects invalid fixture',
+    invalidViolations.length > 0,
+    `${invalidViolations.length} violation(s) found`,
+  );
+
+  const validViolations = checkWorkspaceScriptsDeclared(
+    'quality/tests/fixtures/valid/github/workspace-scripts-declared',
+  );
+  report(
+    'workspace-scripts-declared accepts valid fixture',
+    validViolations.length === 0,
+    `${validViolations.length} violation(s) found`,
+  );
+}
+
+// --- Control: context-check broken links (QR-021) ---
+{
+  const invalidDir = 'quality/tests/fixtures/invalid/context/links';
+  const invalidFailures = checkBrokenLinks(collectMarkdownFiles(invalidDir), invalidDir);
+  report(
+    'context-check (links) rejects invalid fixture',
+    invalidFailures.length > 0,
+    `${invalidFailures.length} violation(s) found`,
+  );
+
+  const validDir = 'quality/tests/fixtures/valid/context/links';
+  const validFailures = checkBrokenLinks(collectMarkdownFiles(validDir), validDir);
+  report(
+    'context-check (links) accepts valid fixture',
+    validFailures.length === 0,
+    `${validFailures.length} violation(s) found`,
+  );
+}
+
+// --- Control: context-check ADR index (QR-021) ---
+{
+  const invalidFailures = checkAdrIndex(
+    'quality/tests/fixtures/invalid/context/adr-index/decisions',
+  );
+  report(
+    'context-check (ADR index) rejects invalid fixture',
+    invalidFailures.length > 0,
+    `${invalidFailures.length} violation(s) found`,
+  );
+
+  const validFailures = checkAdrIndex('quality/tests/fixtures/valid/context/adr-index/decisions');
+  report(
+    'context-check (ADR index) accepts valid fixture',
+    validFailures.length === 0,
+    `${validFailures.length} violation(s) found`,
   );
 }
 

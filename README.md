@@ -40,8 +40,9 @@ docs/
       README.md                    índice dos ADRs + lifecycle (accepted é imutável;
                                     mudança gera novo ADR que supersede o anterior)
       adr-NNN-*.md
-    audits/                        evidência do que foi verificado (vazio até a
-                                    primeira auditoria)
+    audits/                        evidência do que foi verificado — auditoria de
+                                    consistência + threat model (2026-08-12),
+                                    revisão de arquitetura Claude/Codex (2026-08-19)
     quality-enforcement-system.md  sistema de enforcement independente de IA
                                     (policy-as-code, fitness functions, reality
                                     audits) — ver ADR-011
@@ -63,8 +64,10 @@ docs/
 
 ```
 quality/
-  policies/       regras executáveis por domínio (vazio — nasce junto com o
-                   primeiro código que cada policy protege, ver ADR-011)
+  policies/       regras executáveis por domínio — architecture (PII/provider
+                   isolation, workspace scripts), code (EDP004/EDP005 Semgrep);
+                   nasce junto com o primeiro código que cada policy protege
+                   (ver ADR-011); terraform/ e documentation/ ainda vazias
   tests/fixtures/  valid/ e invalid/: prova de que cada policy detecta a
                    violação que diz detectar
   audits/          achados de auditoria contra estado real
@@ -106,7 +109,7 @@ infrastructure/
 
 ## Estado atual
 
-Nenhum código de produto implementado ainda (`apps/`, `services/`, `connectors/`, `packages/` seguem vazios) — o que existe é a fundação operacional (Phase 0, concluída em 2026-08-11) e o sistema de contexto (arquitetura, especificações, glossário, ADRs, padrões, estratégia de qualidade), alinhados ao padrão de engenharia auditado no blog (`../auditoria-padrao-qualidade-marcelo-goncalves-blog.md`) e refinados por uma revisão de engenharia de contexto (canonicalidade, context routing, authority matrix — ver `docs/context-strategy.md`).
+Phase 1 (Identity) e Phase 2 (Catalog) implementadas: `services/identity` (signup/login, Cognito + UsersTable) e `services/catalog` (ingestão TMDB/Ticketmaster, CatalogTable) são código de produto real, com `connectors/tmdb` e `connectors/ticketmaster`. `apps/`, `services/ingestion`, `services/matching`, `services/notifications`, `services/tracking` e a maior parte de `packages/` seguem vazios — próximas fases. A fundação operacional (Phase 0, concluída em 2026-08-11) e o sistema de contexto (arquitetura, especificações, glossário, ADRs, padrões, estratégia de qualidade) seguem alinhados ao padrão de engenharia auditado no blog (`../auditoria-padrao-qualidade-marcelo-goncalves-blog.md`) e refinados por uma revisão de engenharia de contexto (canonicalidade, context routing, authority matrix — ver `docs/context-strategy.md`). Duas revisões conjuntas Claude/Codex já concluídas: arquitetura (~8.2/10, `docs/engineering/audits/2026-08-19-joint-architecture-review.md`) e qualidade de engenharia (`docs/engineering/audits/2026-08-19-joint-engineering-quality-review.md`).
 
 ```text
 [x] Repositório: github.com/marcelo-jgoncalves/event-discovery-platform
@@ -122,7 +125,12 @@ Nenhum código de produto implementado ainda (`apps/`, `services/`, `connectors/
       UsersTable), services/identity (signup/login), primeira Architecture
       Fitness Function e primeira Semgrep custom rule (EDP004) com fixture
       comprovada — ver docs/backlog.md "Phase 1 — Identity"
-[ ] Phase 2 (Catalog) — próximo passo em aberto
+[x] Phase 2 — Catalog: spec-catalog.md, ADR-013, Terraform (CatalogTable),
+      services/catalog (ingest TMDB/Ticketmaster, work resolution),
+      connectors/tmdb + connectors/ticketmaster, quality-rules QR-014/QR-015
+[x] Revisão conjunta Claude/Codex de arquitetura (2026-08-19, ~8.2/10) e de
+      qualidade de engenharia (2026-08-19) — ver docs/engineering/audits/
+[ ] Phase 3 (Matching/Delivery) — próximo passo em aberto
 ```
 
 Checklist de bootstrap completo (o que falta e por quê): `docs/engineering/quality-strategy.md` §15 e `docs/backlog.md`.

@@ -4,6 +4,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  TransactWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import type { ConsentRecord, UserProfile } from '../domain/types.ts';
 
@@ -49,6 +50,30 @@ export class UsersTableRepository {
       new PutCommand({
         TableName: this.tableName,
         Item: { ...consentKey(consent.userId, consent.purpose), ...consent },
+      }),
+    );
+  }
+
+  // A profile without its founding consent (or vice versa, after a crash
+  // between two separate PutCommands) is an invalid account state — signup
+  // must not be able to produce it, so both items commit in one transaction.
+  async putProfileAndConsent(profile: UserProfile, consent: ConsentRecord): Promise<void> {
+    await this.doc.send(
+      new TransactWriteCommand({
+        TransactItems: [
+          {
+            Put: {
+              TableName: this.tableName,
+              Item: { ...profileKey(profile.userId), ...profile },
+            },
+          },
+          {
+            Put: {
+              TableName: this.tableName,
+              Item: { ...consentKey(consent.userId, consent.purpose), ...consent },
+            },
+          },
+        ],
       }),
     );
   }

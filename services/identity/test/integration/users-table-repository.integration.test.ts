@@ -56,6 +56,31 @@ test('putProfile/getProfile round-trip a non-PII profile item', async () => {
   assert.equal(profile?.status, 'ACTIVE');
 });
 
+test('putProfileAndConsent commits both items atomically (signup.ts never leaves a profile without its founding consent)', async () => {
+  const userId = randomUUID();
+  await repository.putProfileAndConsent(
+    {
+      userId,
+      status: 'ACTIVE',
+      createdAt: '2026-08-11T00:00:00.000Z',
+      updatedAt: '2026-08-11T00:00:00.000Z',
+      preferences: {},
+    },
+    {
+      userId,
+      purpose: 'account_terms',
+      version: 1,
+      grantedAt: '2026-08-11T00:00:00.000Z',
+      source: 'SIGNUP_FORM',
+    },
+  );
+
+  const profile = await repository.getProfile(userId);
+  const consent = await repository.getConsent(userId, 'account_terms');
+  assert.equal(profile?.status, 'ACTIVE');
+  assert.equal(consent?.version, 1);
+});
+
 test('getProfile returns undefined for an unknown user', async () => {
   const profile = await repository.getProfile(randomUUID());
   assert.equal(profile, undefined);

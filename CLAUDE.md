@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Contexto operacional para qualquer agente (humano ou IA) trabalhando neste repositório. Regras duráveis apenas — não é o lugar para status de tarefa, decisões pontuais ou detalhe de implementação (isso vive em `docs/engineering/decisions/`, `docs/backlog.md` e nos specs de `docs/architecture/`).
+Contexto operacional para qualquer agente (humano ou IA) trabalhando neste repositório. Regras duráveis apenas — não é o lugar para status de tarefa, decisões pontuais ou detalhe de implementação (isso vive em `docs/engineering/decisions/`, `docs/backlog.md` e nos specs de `docs/architecture/`). Regras específicas de trabalhar com mais de um agente de IA (Claude Code + Codex CLI) vivem em `AGENTS.md`, não aqui.
 
 ## O que é este projeto
 

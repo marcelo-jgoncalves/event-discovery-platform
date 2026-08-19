@@ -32,7 +32,7 @@ Todo documento deste projeto se encaixa em exatamente um papel. Um agente (human
 
 | Papel | Responde a | Onde vive | Muda com que frequência |
 |---|---|---|---|
-| **Agent rules** | "Como eu devo me comportar neste projeto, sempre?" | `CLAUDE.md` | Raramente — só quando o próprio modo de trabalhar muda |
+| **Agent rules** | "Como eu devo me comportar neste projeto, sempre?" | `CLAUDE.md` (regras gerais); `AGENTS.md` (protocolo específico de trabalhar com mais de um agente de IA — Claude Code + Codex CLI — não duplicado em `CLAUDE.md`) | Raramente — só quando o próprio modo de trabalhar muda |
 | **Product intent** | "O que estamos construindo e por quê?" | `docs/product/` | Raramente — muda com pivô de produto, não com feature |
 | **Domain language** | "O que significam nossos conceitos?" | `docs/domain/glossary.md` | Pouco — cresce quando um termo novo entra no domínio |
 | **Architecture/specs** | "Como este subsistema deve funcionar, em detalhe suficiente para implementar?" | `docs/architecture/` | Pouco — só quando o desenho técnico muda de verdade |
@@ -42,6 +42,8 @@ Todo documento deste projeto se encaixa em exatamente um papel. Um agente (human
 | **Operations** | "Como operar/recuperar o sistema?" | `docs/operations/`, `docs/runbooks/` | Conforme o operacional real muda |
 | **Evidence** | "O que foi efetivamente verificado, e quando?" | `docs/engineering/audits/` | A cada auditoria/verificação executada |
 
+Evidence pode ter `authority: normative` no frontmatter sem contradizer o papel: é normativa sobre **o que foi verificado e o que ficou decidido como consequência** (ex.: "estes itens ficam adiados com este trigger") — não sobre desenho de sistema, que continua vivendo em Architecture/Decisions. Se um audit doc e um spec/ADR discordarem sobre desenho, o spec/ADR vence; se discordarem sobre o que uma rodada de revisão concluiu, o audit doc vence.
+
 `docs/architecture/system-overview.md` não é um papel próprio — é o **context router**: mapa de leitura e roteamento, deliberadamente não normativo (ver §4).
 
 ---
@@ -50,6 +52,9 @@ Todo documento deste projeto se encaixa em exatamente um papel. Um agente (human
 
 ```text
 CLAUDE.md                                   Agent rules
+AGENTS.md                                   Agent rules — protocolo
+                                             multiagente (Claude↔Codex),
+                                             não duplicado em CLAUDE.md
 
 docs/product/
   vision.md                                 Product intent
@@ -63,6 +68,8 @@ docs/architecture/
                                              read sets por tarefa, authority
                                              matrix. Não normativo.
   architecture.md                           ÚNICA arquitetura vigente (normativa)
+  spec-identity.md                          Desenho concreto de Identity (Phase 1)
+  spec-catalog.md                           Desenho concreto de Catalog (Phase 2)
   spec-dynamodb-access-patterns.md          Hot path de matching
   spec-notification-delivery.md             Hot path de delivery
   history/
@@ -70,25 +77,46 @@ docs/architecture/
                                              nunca normativo
 
 docs/engineering/
-  quality-strategy.md                       Quality/standards (política)
+  quality-strategy.md                       Quality/standards (política — o
+                                             quê e por quê)
+  quality-rules.md                          Quality/standards (registry —
+                                             cada regra com mecanismo de
+                                             enforcement real, QR-NNN)
+  quality-enforcement-system.md             Quality/standards (como o
+                                             enforcement independente de IA
+                                             funciona, ADR-011)
   standards/
     principles.md                           Por que as regras existem
     code-conventions.md                     Convenções de código
     testing-strategy.md                     Estratégia de testes
     git-and-review-workflow.md              Fluxo de git/PR
+    resource-naming.md                      Convenção de nomes/tags de
+                                             recursos de infraestrutura
+    joint-review-criteria.md                Critérios por eixo das revisões
+                                             conjuntas Claude↔Codex
+                                             (`AGENTS.md` §2.1) — fonte única,
+                                             docs de audits só referenciam
   decisions/
     README.md                               Índice de ADRs + regra de
                                              imutabilidade/supersede
     adr-NNN-*.md                            Decisions (ADRs consolidados
                                              por componente, ver README.md
                                              do índice para a contagem atual)
-  audits/                                   Evidence — vazio até a primeira
-                                             auditoria rodar
+  audits/                                   Evidence — populado desde
+                                             2026-08-11 (auditorias de
+                                             consistência e as revisões
+                                             conjuntas Claude↔Codex)
 
 docs/backlog.md                             Work state
 docs/api/                                   Vazio — nasce quando a primeira
                                              API for definida
-docs/operations/                            Operations — vazio
+docs/operations/                            Operations (nominal) — hoje
+                                             guarda prompts de kickoff de
+                                             fase encerrados (`status: done`,
+                                             `authority: historical`), não
+                                             runbooks — desvio de papel
+                                             conhecido, ver `docs/backlog.md`
+                                             §"Engenharia de contexto"
 docs/runbooks/                              Operations — vazio
 ```
 
@@ -169,7 +197,7 @@ Regra completa em `CLAUDE.md` §"Contexto efêmero". Resumo: raciocínio interme
 O ponto mais valioso identificado na auditoria do padrão anterior não foi nenhum controle técnico específico — foi a disciplina de **auditar contra a realidade, não contra a documentação** (`docs/engineering/quality-strategy.md` §9). Aplicado à própria estratégia de contexto:
 
 - `docs/engineering/audits/` recebe tanto auditorias de consistência de produto/código quanto revisões da própria estratégia de contexto (evidence, não architecture nem backlog).
-- `docs/backlog.md` tem uma seção "Dívida técnica conhecida" deliberadamente vazia hoje — o teste de que o sistema funciona é essa seção deixar de estar vazia assim que a primeira simplificação consciente for feita, em vez de ficar esquecida.
+- `docs/backlog.md` §"Dívida técnica conhecida" era deliberadamente vazia até 2026-08-19 — o teste de que o sistema funciona era essa seção deixar de estar vazia assim que a primeira simplificação consciente fosse feita, em vez de ficar esquecida. O teste já passou: a revisão conjunta de arquitetura desse dia populou a seção com os itens reais encontrados e corrigidos no mesmo dia (ver `docs/backlog.md`).
 - Todo trigger de evolução é numérico ou verificável, nunca "quando parecer necessário", e vive uma única vez (§5).
 
 ---
@@ -180,20 +208,33 @@ Consistente com "sofisticação segue complexidade observada" (`docs/engineering
 
 ```text
 docs/api/                 vazio — nasce quando a primeira API pública for definida
-docs/operations/          vazio — nasce com o primeiro ambiente real implantado
+docs/operations/          hoje guarda só prompts de kickoff encerrados
+                           (histórico), não runbooks reais — runbook
+                           operacional nasce com o primeiro ambiente real
+                           implantado
 docs/runbooks/            vazio — nasce com o primeiro procedimento operacional real
-docs/engineering/audits/  vazio até a primeira auditoria executada
+docs/engineering/audits/  populado desde 2026-08-11 (ver §3) — a lacuna
+                           real que resta aqui é o lifecycle de arquivamento
+                           (quando um achado é considerado resolvido/
+                           encerrado), ainda não definido
 metadata YAML completa    aplicada hoje aos documentos normativos centrais
                            (architecture.md, history/, system-overview.md,
                            glossary.md, ADRs); rollout para o restante de
                            docs/ é trabalho futuro, não urgente
-context:check automatizado (link quebrado, índice de ADR ↔ arquivos,
-                           doc ativo referenciando arquivo superseded) —
-                           vale a pena quando o volume de documentos
-                           justificar automação, não antes
-AGENTS.md como contrato agnóstico de fornecedor de IA — CLAUDE.md
-                           permanece o contrato único enquanto só um
-                           agente for usado neste projeto
+context:check automatizado — implementado em 2026-08-19 (QR-021,
+                           `quality/scripts/context-check.mjs`, gate de CI)
+                           para a classe mecânica (link quebrado, índice de
+                           ADR ↔ arquivos); doc ativo referenciando arquivo
+                           `superseded` ainda não é verificado
+                           automaticamente — trigger: quando `history/`
+                           ganhar um segundo tema além de
+                           `architecture-v1.md` (mais superfície para esse
+                           tipo de referência ficar obsoleta sem detecção)
+AGENTS.md — existe desde 2026-08-19 como contrato compartilhado por
+                           Claude Code e Codex CLI (os dois agentes em uso
+                           hoje); portabilidade agnóstica plena para um
+                           terceiro fornecedor de IA continua adiada, ver
+                           `docs/backlog.md` §"Engenharia de contexto"
 ```
 
 Não são lacunas esquecidas — são adiamentos conscientes, com o mesmo raciocínio de trigger aplicado ao resto da arquitetura: cada um entra em escopo quando o volume/necessidade real justificar, registrado aqui para não se perder.

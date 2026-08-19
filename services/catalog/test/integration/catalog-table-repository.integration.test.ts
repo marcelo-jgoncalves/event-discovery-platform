@@ -65,6 +65,29 @@ test('putWork/getWork round-trip and write the WORKTITLE companion item', async 
   assert.ok(candidates.some((c) => c.canonicalId === w.canonicalId));
 });
 
+test('putWork re-ingestion with a changed normalizedTitle deletes the stale WORKTITLE# entry', async () => {
+  const id = randomUUID();
+  await repository.putWork(work(id, 'interstelar'));
+  await repository.putWork(work(id, 'interstellar'));
+
+  const stale = await repository.findWorksByNormalizedTitle('interstelar');
+  const current = await repository.findWorksByNormalizedTitle('interstellar');
+  assert.equal(stale.length, 0);
+  assert.ok(current.some((c) => c.canonicalId === `WORK#tmdb:${id}`));
+});
+
+test('putWork re-ingestion preserves the original createdAt', async () => {
+  const id = randomUUID();
+  const first = work(id, 'dune');
+  await repository.putWork(first);
+
+  const second = { ...work(id, 'dune'), createdAt: '2099-01-01T00:00:00.000Z' };
+  await repository.putWork(second);
+
+  const fetched = await repository.getWork(first.canonicalId);
+  assert.equal(fetched?.createdAt, now);
+});
+
 test('putEvent writes REVIEW#UNRESOLVED companion item only when unresolved', async () => {
   const resolved: CanonicalEvent = {
     canonicalId: `EVENT#ticketmaster:${randomUUID()}`,
@@ -90,6 +113,27 @@ test('putEvent writes REVIEW#UNRESOLVED companion item only when unresolved', as
   const reviewQueue = await repository.listUnresolvedEvents();
   assert.ok(reviewQueue.includes(unresolved.canonicalId));
   assert.ok(!reviewQueue.includes(resolved.canonicalId));
+});
+
+test('putEvent re-ingestion that resolves a previously UNRESOLVED event deletes the stale REVIEW# entry', async () => {
+  const id = `EVENT#ticketmaster:${randomUUID()}`;
+  const unresolved: CanonicalEvent = {
+    canonicalId: id,
+    type: 'SCREENING',
+    title: 'Interstellar (IMAX)',
+    startAt: now,
+    status: 'onsale',
+    resolutionStatus: 'UNRESOLVED',
+    source: 'ticketmaster',
+    sourceId: 'x',
+    createdAt: now,
+    updatedAt: now,
+  };
+  await repository.putEvent(unresolved);
+  assert.ok((await repository.listUnresolvedEvents()).includes(id));
+
+  await repository.putEvent({ ...unresolved, resolutionStatus: 'RESOLVED', workId: 'WORK#tmdb:1' });
+  assert.ok(!(await repository.listUnresolvedEvents()).includes(id));
 });
 
 test('getEvent returns undefined for an unknown event', async () => {

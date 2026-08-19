@@ -14,10 +14,12 @@ Não é fonte de verdade de nada — é o mapa que diz onde a verdade vive e qua
 1. docs/product/vision.md              — o que estamos construindo e por quê
 2. docs/domain/glossary.md             — vocabulário canônico do domínio
 3. architecture.md                     — arquitetura vigente (única, normativa)
-4. spec-dynamodb-access-patterns.md    — hot path de matching
-5. spec-notification-delivery.md       — hot path de delivery
-6. docs/engineering/decisions/         — ADRs (histórico de decisões aceitas)
-7. docs/engineering/quality-strategy.md — o que "qualidade" significa aqui
+4. spec-identity.md                    — desenho concreto de Identity (Phase 1)
+5. spec-catalog.md                     — desenho concreto de Catalog (Phase 2)
+6. spec-dynamodb-access-patterns.md    — hot path de matching
+7. spec-notification-delivery.md       — hot path de delivery
+8. docs/engineering/decisions/         — ADRs (histórico de decisões aceitas)
+9. docs/engineering/quality-strategy.md — o que "qualidade" significa aqui
 ```
 
 `history/architecture-v1.md` é opcional — só vale a pena ler para entender *como* o desenho chegou ao estado atual, nunca como fonte do estado atual.
@@ -77,6 +79,14 @@ Registrar/revisar decisão de qualidade (CI, gates, exceção)
      mudança envolver um novo mecanismo de enforcement (não só um gate
      dentro de um mecanismo já existente)
 
+Rodar/participar de uma revisão conjunta Claude↔Codex (eixo novo ou rodada)
+  1. CLAUDE.md
+  2. AGENTS.md §2 e §2.1 (protocolo de debate, nota cega, procedimento
+     por eixo) e §3 (invocação do Codex CLI)
+  3. docs/engineering/standards/joint-review-criteria.md (critérios do
+     eixo — não redefinir se já convergido)
+  4. último audit doc fechado do mesmo eixo, se houver rodada anterior
+
 Criar/alterar infraestrutura (Terraform, novo recurso AWS)
   1. CLAUDE.md
   2. spec relevante (nome lógico do recurso)
@@ -120,9 +130,11 @@ Drift = a intenção documentada (spec/ADR) e a realidade (código, Terraform, o
 ## Subsistemas e onde cada um está especificado
 
 ```text
-Ingestion / Connectors        → architecture.md, history/architecture-v1.md §7-9
+Identity (Cognito, UsersTable) → spec-identity.md, ADR-012
+Ingestion / Connectors        → spec-catalog.md, architecture.md, history/architecture-v1.md §7-9
+Catalog (CatalogTable)        → spec-catalog.md, ADR-013
 Canonical model / Entity
-  Resolution                  → docs/domain/glossary.md, ADR-002
+  Resolution                  → docs/domain/glossary.md, ADR-002, spec-catalog.md
 Matching (InterestIndexTable) → spec-dynamodb-access-patterns.md, ADR-003
 Notification delivery         → spec-notification-delivery.md, ADR-004
 Messaging topology            → architecture.md §2, ADR-001

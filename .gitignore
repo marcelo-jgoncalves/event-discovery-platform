@@ -23,3 +23,6 @@ crash.*.log
 Thumbs.db
 .vscode/
 .idea/
+
+# Contexto efêmero de sessão (docs/context-strategy.md §9) — nunca commitar
+NEXT_SESSION_PROMPT.md
