@@ -10,22 +10,7 @@ Segunda aplicação do protocolo de debate Claude↔Codex (`AGENTS.md` §2), sob
 
 ## Metodologia
 
-Critérios (12, pesos somando 100%) já convergidos antes desta sessão — ver `NEXT_SESSION_PROMPT.md` para o processo de definição — e usados aqui verbatim, sem reabertura:
-
-| # | Critério | Peso |
-|---:|---|---:|
-| 1 | Code Correctness & Defensive Design | 11% |
-| 2 | Test Effectiveness & Coverage Discipline | 14% |
-| 3 | CI Quality Gates & Merge Safety | 11% |
-| 4 | Type Safety, Static Analysis & Automated Enforcement | 9% |
-| 5 | Readability, Consistency & Implementation Maintainability | 9% |
-| 6 | Delivery, Release & Recovery Discipline | 8% |
-| 7 | Dependency & Supply-Chain Hygiene | 7% |
-| 8 | Debuggability & Operational Feedback | 6% |
-| 9 | Developer Experience & Reproducibility | 6% |
-| 10 | Documentation Quality & Process Discipline | 6% |
-| 11 | Documentation–Implementation Drift Control | 7% |
-| 12 | Technical-Debt & Continuous-Improvement Practice | 6% |
+12 critérios, peso somando 100%, já convergidos antes desta sessão e usados aqui verbatim, sem reabertura — ver `docs/engineering/standards/joint-review-criteria.md` §"Eixo: Qualidade de engenharia" (fonte única, não duplicada aqui).
 
 Processo por rodada: Claude lê o repositório real (código de `services/identity`, `services/catalog`, `connectors/tmdb`, `connectors/ticketmaster`, `quality/`, CI, Terraform) e pontua com evidência de arquivo/linha; Codex é invocado via `codex exec --skip-git-repo-check` (protocolo `AGENTS.md` §3) e pontua de forma cega, sem ver a nota de Claude, lendo o repositório real por conta própria a cada rodada (nunca "de memória"). Achados concretos viram correções reais no mesmo commit/leva, não apenas re-pontuação — `npm run quality:check` (typecheck+lint+test+fitness functions) e `terraform validate`/`fmt -check` verdes antes de cada commit.
 

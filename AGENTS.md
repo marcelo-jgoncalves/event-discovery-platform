@@ -18,6 +18,17 @@ Quando aplicável:
 - Desacordo abaixo de 9 reabre rodada em vez de arredondar ou fazer média.
 - Registrar o resultado do debate na seção `Consequências` (ou `Alternativas consideradas`, se mais aplicável) do ADR correspondente: rodadas, notas finais de cada agente, e pontos de divergência não resolvidos, se houver. Não criar um documento separado para isso (ver `CLAUDE.md` §"Contexto efêmero").
 
+### 2.1. Revisão conjunta de qualidade (por eixo) — procedimento reutilizável
+
+Além do debate sobre uma decisão pontual (§2), este protocolo também roda como **revisão periódica de qualidade por eixo** (ex.: Arquitetura, Qualidade de Engenharia — ver eixos já convergidos em `docs/engineering/standards/joint-review-criteria.md`). Ao abrir um eixo novo (ou repetir um existente), seguir sempre este procedimento em vez de reescrevê-lo do zero em um prompt de sessão:
+
+1. **Definir critérios (só na primeira vez que o eixo roda).** Claude pesquisa fontes reconhecidas (ex. ISO/IEC 25010, AWS Well-Architected, ATAM, DORA/Core-4 — escolher conforme o eixo) e propõe critérios com peso, sem mostrar ao Codex. Codex faz o mesmo, independentemente. Convergir em uma rodada de negociação até pesos somarem 100%. **Persistir o resultado em `docs/engineering/standards/joint-review-criteria.md`** (uma seção nova, formato igual aos eixos existentes) — nunca dentro do doc de auditoria da rodada. Eixo já convergido não reabre esta etapa.
+2. **Rodada cega.** Cada agente lê o repositório real (não critérios "de memória" de rodada anterior) e pontua 0-10 por critério com evidência de arquivo/linha. Codex via `codex exec --skip-git-repo-check` (§3), pontuando antes de ver a nota de Claude.
+3. **Comparar, investigar gaps ≥1 ponto**, corrigir de verdade (código/teste/config real, não só re-pontuar), validar (`npm run verify` + `npm run quality:check`, e `terraform validate`/`fmt` se tocar infra) antes de cada commit.
+4. **Repetir rodadas cegas** (mínimo 3) até nota conjunta ≥9.0 sem arredondar, ou até Claude e Codex concordarem, de forma independente, que o gap restante exige algo fora do escopo razoável da sessão (infraestrutura inexistente, decisão só do Marcelo) — nesse caso, registrar em `docs/backlog.md` com trigger explícito, nunca inflar a nota nem construir controle de fachada.
+5. **Documentar o resultado** em `docs/engineering/audits/<data>-joint-<eixo>-review.md`: metodologia (linkando a seção de critérios, não duplicando), notas por rodada, achados e correções, itens conscientemente adiados com trigger. Este doc é Evidence (`docs/context-strategy.md` §2) — muda a cada execução; os critérios em si não vivem aqui.
+6. Um prompt de sessão usado para retomar/disparar uma rodada (tipo `NEXT_SESSION_PROMPT.md`) é contexto efêmero — não commitar no repo além da sessão em que foi usado; o que precisa sobreviver já foi promovido para os destinos acima (critérios → passo 1, resultado → passo 5).
+
 ## 3. Invocação do Codex
 
 - `codex exec --skip-git-repo-check "<prompt>"`, rodado a partir do diretório deste repositório (define o `workdir`). `--skip-git-repo-check` é necessário porque o diretório pai (`projects/`) não é ele mesmo um repositório git.

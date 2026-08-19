@@ -16,21 +16,9 @@ Primeira aplicação do protocolo de debate Claude↔Codex (`AGENTS.md` §2), di
 4. Cada agente leu o repositório real (specs, ADRs, backlog, Terraform, código) e pontuou (0-10) cada critério independentemente, **antes de ver a nota do outro** (protocolo de nota cega, mesma regra do `AGENTS.md` §2).
 5. Após comparar as notas da Rodada 1, correções concretas foram implementadas (não apenas "consenso de nota") e o processo repetiu por mais duas rodadas.
 
-## Critérios finais (peso, 0-10 por critério)
+## Critérios
 
-| # | Critério | Peso |
-|---|---|---:|
-| 1 | Domain Fit & Simplicity | 11% |
-| 2 | Reliability & Fault Recovery | 13% |
-| 3 | Event & Integration Correctness | 10% |
-| 4 | Data Model & Consistency | 10% |
-| 5 | Security & Privacy | 11% |
-| 6 | Modifiability & Evolvability | 9% |
-| 7 | Observability & Operability | 9% |
-| 8 | Testability & Delivery Safety | 8% |
-| 9 | Cost & Resource Governance | 6% |
-| 10 | Performance & Scalability Fitness | 5% |
-| 11 | Architecture Governance & Traceability | 8% |
+11 critérios, peso somando 100% — ver `docs/engineering/standards/joint-review-criteria.md` §"Eixo: Arquitetura" (fonte única, não duplicada aqui).
 
 ## Rodada 1 — nota cega
 

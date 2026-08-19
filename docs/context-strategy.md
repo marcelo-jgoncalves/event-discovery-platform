@@ -76,6 +76,10 @@ docs/engineering/
     code-conventions.md                     Convenções de código
     testing-strategy.md                     Estratégia de testes
     git-and-review-workflow.md              Fluxo de git/PR
+    joint-review-criteria.md                Critérios por eixo das revisões
+                                             conjuntas Claude↔Codex
+                                             (`AGENTS.md` §2.1) — fonte única,
+                                             docs de audits só referenciam
   decisions/
     README.md                               Índice de ADRs + regra de
                                              imutabilidade/supersede
