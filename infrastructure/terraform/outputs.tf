@@ -1,11 +1,6 @@
 output "cicd_role_arn" {
   value       = module.iam-github-oidc.role_arn
-  description = "Set as the AWS_ROLE_ARN_{ENV} GitHub Actions secret for this environment."
-}
-
-output "cd_deploy_role_arn" {
-  value       = module.iam-github-oidc.deploy_role_arn
-  description = "ADR-014 — set as the AWS_ROLE_ARN_CD_DEV GitHub Actions secret. Only cd.yml assumes this."
+  description = "Set as the AWS_ROLE_ARN_{ENV} GitHub Actions secret for this environment — used by both ci.yml (plan) and cd.yml (apply), ADR-015."
 }
 
 output "identity_user_pool_id" {

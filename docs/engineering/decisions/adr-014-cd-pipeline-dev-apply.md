@@ -1,12 +1,14 @@
 ---
-status: accepted
+status: superseded
 date: 2026-08-19
 supersedes: []
 ---
 
 # ADR-014 — CD Pipeline: GitHub Actions Applies Dev Infrastructure, Never a Local Machine
 
-Status: Accepted
+Status: Superseded
+
+> Superseded-by: ADR-015. Item 1-2 (role de deploy separada da role de CI, com trust policy mais restrita) foi revertido a pedido explícito do Marcelo: reusar a role de CI já existente (`edp-dev-role-cicd-github-actions`), em vez de manter duas roles. O restante desta ADR (trigger em push para `main`, sem `develop`, sem job de prod, smoke test via AWS API em vez de HTTP) continua válido e não foi reaberto — ver ADR-015 para o que exatamente mudou.
 
 ## Contexto
 

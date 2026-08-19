@@ -1,15 +1,19 @@
 name: Deploy Pipeline (CD)
 
-# ADR-014: this is the only place `terraform apply` of product resources
-# runs — never from a local machine, including Marcelo's. Triggers on push
-# to `main`, i.e. after a PR has already passed every Tier A required check
-# (docs/engineering/quality-strategy.md §1.1, branch protection). Unlike
-# marcelo-goncalves-blog/.github/workflows/cd.yml, this workflow does not
-# re-run verify/security-scans/quality-check before deploying — main
-# already enforces all of that on every merge (enforce_admins=true, no
-# direct push), so re-running here would just duplicate an already-required
-# gate. `terraform validate`/`plan` still run in this job as a final,
-# cheap safety net immediately before apply.
+# ADR-014/ADR-015: this is the only place `terraform apply` of product
+# resources runs — never from a local machine, including Marcelo's.
+# Triggers on push to `main`, i.e. after a PR has already passed every
+# Tier A required check (docs/engineering/quality-strategy.md §1.1, branch
+# protection). Unlike marcelo-goncalves-blog/.github/workflows/cd.yml, this
+# workflow does not re-run verify/security-scans/quality-check before
+# deploying — main already enforces all of that on every merge
+# (enforce_admins=true, no direct push), so re-running here would just
+# duplicate an already-required gate. `terraform validate`/`plan` still run
+# in this job as a final, cheap safety net immediately before apply.
+#
+# Assumes the same IAM role ci.yml already uses for `terraform plan`
+# (AWS_ROLE_ARN_DEV) — ADR-015 reverted ADR-014's separate, more narrowly
+# trusted deploy role in favor of a single role for both.
 
 on:
   push:
@@ -48,7 +52,9 @@ jobs:
 
       - uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN_CD_DEV }}
+          # ADR-015: same role ci.yml already assumes for plan — no
+          # separate deploy role/secret.
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
           aws-region: ${{ env.AWS_REGION }}
 
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1

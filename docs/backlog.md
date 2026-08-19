@@ -237,16 +237,16 @@ Explicitamente fora do escopo da Phase 0 (`docs/operations/phase-0-kickoff-promp
       apply real (ver item CD real abaixo)
 [ ] Tier C (scale, failure, DAST completo, restore drill) — depende de Tier B
 [x] CD real (terraform apply automático de recursos de produto) — FEITO
-      2026-08-19, ADR-014 (`docs/engineering/decisions/
-      adr-014-cd-pipeline-dev-apply.md`): `.github/workflows/cd.yml`,
-      role de deploy separada da role de CI (`modules/iam-github-oidc`,
-      trust restrita a `cd.yml`+`main` via `job_workflow_ref`). A partir
-      de agora todo `terraform apply` de recursos de produto roda só pela
-      pipeline — nunca de máquina local, nem a de Marcelo. Falta: bootstrap
-      único do módulo `iam-github-oidc` (aplicado localmente, uma vez, só
-      para materializar a role de deploy — ver ADR-014 item 6) e configurar
-      o secret `AWS_ROLE_ARN_CD_DEV` no GitHub antes do primeiro push que
-      dispare `cd.yml`
+      2026-08-19, ADR-015 (`docs/engineering/decisions/
+      adr-015-reuse-ci-role-for-cd-apply.md`, supersede ADR-014):
+      `.github/workflows/cd.yml` dispara em push para `main`, assume a
+      mesma role de CI já existente (`edp-dev-role-cicd-github-actions`,
+      secret `AWS_ROLE_ARN_DEV` já configurado — nenhum secret novo). A
+      partir de agora todo `terraform apply` de recursos de produto roda
+      só pela pipeline — nunca de máquina local, nem a de Marcelo. Falta:
+      aplicar localmente, uma única vez, a ampliação de escopo da policy
+      da role de CI (de plan-only para plan+apply) — nenhuma pipeline
+      consegue conceder a si mesma uma permissão que ainda não tem
 [ ] CloudTrail + GuardDuty no primeiro ambiente AWS
 [x] Formalizar os ADRs consolidados just-in-time, antes da implementação
       do componente afetado (docs/engineering/decisions/) — CORRIGIDO
