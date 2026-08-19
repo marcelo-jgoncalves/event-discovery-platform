@@ -162,6 +162,11 @@ data "aws_iam_policy_document" "identity_service" {
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
       "dynamodb:Query",
+      // signup.ts -> putProfileAndConsent commits profile+consent via
+      // TransactWriteItems (2026-08-19 architecture review) — without this
+      // action the transactional write fails with AccessDenied at runtime,
+      // a gap real IAM least-privilege scoping does not catch by itself.
+      "dynamodb:TransactWriteItems",
     ]
     resources = [aws_dynamodb_table.users.arn]
   }
