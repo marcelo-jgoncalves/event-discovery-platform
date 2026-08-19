@@ -1,0 +1,32 @@
+version: 2
+updates:
+  # npm workspaces: security updates immediately (one PR per advisory);
+  # version updates grouped weekly to avoid PR noise, per
+  # docs/engineering/quality-strategy.md §1.2 ("Dependabot security updates
+  # habilitado; version updates agrupados e revisados"). This file was
+  # missing until the engineering-quality review (2026-08-19) found the
+  # doc/code drift: the strategy document claimed Dependabot was enabled,
+  # but no config existed.
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      npm-version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'
+    open-pull-requests-limit: 10
+
+  # GitHub Actions: security updates immediately; version updates grouped
+  # weekly. Actions are pinned by full commit SHA (QR-001) — Dependabot
+  # updates the SHA and the trailing version comment together.
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    groups:
+      actions-version-updates:
+        applies-to: version-updates
+        patterns:
+          - '*'

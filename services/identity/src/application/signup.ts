@@ -44,7 +44,21 @@ export async function signup(
     now,
   });
 
-  await deps.usersTable.putProfileAndConsent(profile, consent);
+  // Cognito is the system of record for the account itself, UsersTable for
+  // profile+consent (ADR-012) — the two can't commit in one transaction
+  // across services. If the DynamoDB write fails after Cognito already
+  // created the account, compensate by deleting the orphaned Cognito user
+  // instead of leaving an account with no profile/consent that a retried
+  // signup can never recreate (UsernameExistsException). Engineering-quality
+  // review, 2026-08-19 (Codex finding).
+  try {
+    await deps.usersTable.putProfileAndConsent(profile, consent);
+  } catch (err) {
+    // Best-effort: the original DynamoDB failure is the one the caller
+    // needs to see and retry on, not a secondary Cognito cleanup failure.
+    await deps.cognito.deleteUser(parsed.email).catch(() => undefined);
+    throw err;
+  }
 
   return { userId };
 }

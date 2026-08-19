@@ -7,10 +7,11 @@
 // job (.github/workflows/security.yml), not duplicated here.
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
 import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
+import { checkWorkspaceScriptsDeclared } from '../policies/github/workspace-scripts-declared.mjs';
 
 let failed = false;
 let passed = 0;
-const total = 2;
+const total = 3;
 
 const piiViolations = checkNoExternalPiiImport(process.cwd());
 if (piiViolations.length > 0) {
@@ -34,6 +35,18 @@ if (providerViolations.length > 0) {
 } else {
   passed += 1;
   console.log('[quality-check] no-external-provider-call: OK');
+}
+
+const scriptViolations = checkWorkspaceScriptsDeclared(process.cwd());
+if (scriptViolations.length > 0) {
+  failed = true;
+  console.error('[quality-check] workspace-scripts-declared: VIOLATIONS FOUND');
+  for (const v of scriptViolations) {
+    console.error(`  ${v.workspace} is missing script(s): ${v.missing.join(', ')}`);
+  }
+} else {
+  passed += 1;
+  console.log('[quality-check] workspace-scripts-declared: OK');
 }
 
 if (failed) {

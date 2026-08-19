@@ -65,11 +65,20 @@ jobs:
       - name: Architecture fitness functions
         run: node quality/scripts/quality-check.mjs
 
+      # quality-rules.md QR-012/QR-013/QR-014/QR-015 evidence depends on
+      # this proving invalid fixtures are still rejected and valid ones
+      # still accepted — was only ever run manually before this review
+      # (engineering-quality review, 2026-08-19), so a degraded custom
+      # control could merge while everything else stayed green.
+      - name: Quality control self-test (fixture-based)
+        run: npm run quality:self-test
+
   # ==============================================================
   # integration-fast: DynamoDB Local / emulated services, no mock of
-  # persistence semantics (quality-strategy.md §1.1). No workspace defines
-  # test:integration yet — job exists and runs against the emulator from
-  # commit zero regardless, per the phase-0 kickoff instruction.
+  # persistence semantics (quality-strategy.md §1.1). Job exists and runs
+  # against the emulator from commit zero regardless of whether any
+  # workspace defines test:integration yet, per the phase-0 kickoff
+  # instruction — Identity and Catalog both define it as of Phase 1-2.
   # ==============================================================
   integration-fast:
     name: Integration (fast, DynamoDB Local)

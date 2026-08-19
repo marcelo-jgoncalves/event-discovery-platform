@@ -244,8 +244,13 @@ Explicitamente fora do escopo da Phase 0 (`docs/operations/phase-0-kickoff-promp
       armazenar o primeiro dado de usuário real
 [ ] Implementar Data Quality invariants + métricas (quality-strategy.md §5.4)
       antes do primeiro evento real poder ficar READY
-[ ] Habilitar Dependabot security updates (Dependency Review já está
-      ativo no Tier A; falta o bot de atualização automática)
+[x] Habilitar Dependabot security updates (Dependency Review já está
+      ativo no Tier A; faltava o bot de atualização automática) — CORRIGIDO
+      2026-08-19 (revisão conjunta Claude/Codex de qualidade de engenharia):
+      `.github/dependabot.yml` criado (npm + github-actions, security
+      updates imediatos, version updates agrupados semanalmente), fechando
+      o drift entre `quality-strategy.md` §1.2 (que já afirmava Dependabot
+      "habilitado") e a ausência real de configuração — achado do Codex
 [ ] Adicionar DAST Tier B e threat model inicial antes do primeiro beta
 [ ] Adicionar axe/Playwright para fluxos críticos do frontend
 [ ] Executar primeiro restore drill antes de considerar backup "validado"

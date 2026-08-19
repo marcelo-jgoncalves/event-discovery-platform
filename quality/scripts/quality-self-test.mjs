@@ -7,6 +7,7 @@
 import { spawnSync } from 'node:child_process';
 import { checkNoExternalPiiImport } from '../policies/architecture/no-external-pii-import.mjs';
 import { checkNoExternalProviderCall } from '../policies/architecture/no-external-provider-call.mjs';
+import { checkWorkspaceScriptsDeclared } from '../policies/github/workspace-scripts-declared.mjs';
 
 let operational = 0;
 let total = 0;
@@ -58,6 +59,27 @@ function report(name, ok, detail) {
   );
   report(
     'no-external-provider-call accepts valid fixture',
+    validViolations.length === 0,
+    `${validViolations.length} violation(s) found`,
+  );
+}
+
+// --- Control: workspace-scripts-declared (process fitness function) ---
+{
+  const invalidViolations = checkWorkspaceScriptsDeclared(
+    'quality/tests/fixtures/invalid/github/workspace-scripts-declared',
+  );
+  report(
+    'workspace-scripts-declared rejects invalid fixture',
+    invalidViolations.length > 0,
+    `${invalidViolations.length} violation(s) found`,
+  );
+
+  const validViolations = checkWorkspaceScriptsDeclared(
+    'quality/tests/fixtures/valid/github/workspace-scripts-declared',
+  );
+  report(
+    'workspace-scripts-declared accepts valid fixture',
     validViolations.length === 0,
     `${validViolations.length} violation(s) found`,
   );
