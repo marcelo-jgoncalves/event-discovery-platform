@@ -295,4 +295,25 @@ WhatsApp, Push, Email                         → trigger: ADR-006 (segundo cana
 
 ## Dívida técnica conhecida
 
-_(vazio — nenhum código de produto implementado ainda, só fundação de CI/CD/IaC (Phase 0) e o esqueleto do sistema de qualidade. Preencher conforme surgir, seguindo o padrão: item + causa + decisão de adiar + condição de retomada.)_
+Corrigido em 2026-08-19 (revisão conjunta Claude/Codex de arquitetura, ver `AGENTS.md` §2): esta seção afirmava "nenhum código de produto implementado ainda", desatualizado desde a Phase 1 (2026-08-11) — drift de documentação, não de código (protocolo de `system-overview.md`). Itens reais identificados nessa revisão, já corrigidos no mesmo dia: escritas não-atômicas em signup (profile+consent) e catalog (Work+WORKTITLE, Event+REVIEW) — agora `TransactWriteItems`; `createdAt` sobrescrito em re-ingestão; item `WORKTITLE#`/`REVIEW#` obsoleto não removido em mudança de título/resolução; payloads de provider validados só por type-cast TypeScript, sem schema runtime (agora Zod, `tmdb-normalizer.ts`/`ticketmaster-normalizer.ts`); `startAt` do Ticketmaster ausente virava silenciosamente `now()` em vez de rejeitar o registro; `security.yml` rodava Semgrep/Gitleaks duas vezes por PR (trigger `pull_request` próprio + chamada via `ci.yml`).
+
+```text
+[ ] Publicação de evento (catalog.event.normalized.v1) via console.log,
+      sem outbox/handoff durável → aceito conscientemente até existir um
+      segundo consumidor real (Matcher, Phase 3) — trigger: início da
+      Phase 3, ver architecture.md §2 e spec-catalog.md §8.5
+[ ] Testes de integração (DynamoDB Local) nunca executados localmente
+      nesta revisão nem nas anteriores, por falta de Docker no ambiente de
+      execução — dependem do mesmo padrão que já roda em CI
+      (integration-fast); risco residual: mudanças nos repositórios
+      transacionais desta revisão foram verificadas por leitura de código
+      e por unit tests, não por execução real do integration test novo
+      contra DynamoDB Local
+[ ] Telemetria operacional real (alarmes de DLQ/queue depth, retenção de
+      log explícita, dashboards) para Identity/Catalog → Phase 1-2 têm
+      apenas structured console.log; trigger: primeiro ambiente dev
+      implantado com CloudWatch real
+[ ] AWS budgets / cost alarms → nenhum configurado ainda; trigger: antes
+      do primeiro tráfego real de produção (ver também item já registrado
+      em "Bootstrap pendente" sobre dashboards de SLO)
+```

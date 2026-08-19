@@ -35,7 +35,6 @@ export async function signup(
     updatedAt: now,
     preferences: {},
   };
-  await deps.usersTable.putProfile(profile);
 
   const consent = grantConsent(undefined, {
     userId,
@@ -44,7 +43,8 @@ export async function signup(
     source: 'SIGNUP_FORM',
     now,
   });
-  await deps.usersTable.putConsent(consent);
+
+  await deps.usersTable.putProfileAndConsent(profile, consent);
 
   return { userId };
 }

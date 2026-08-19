@@ -1,13 +1,15 @@
 name: Security Scan
 
 on:
-  pull_request:
-    branches: [main]
   workflow_dispatch:
-  # Lets ci.yml call this as a required job so a failing scan actually
-  # blocks the Tier A gate, not just runs in parallel with no effect
-  # (docs/engineering/quality-strategy.md §1: lesson from the reused pattern
-  # in marcelo-goncalves-blog — CI that exists in YAML but doesn't gate).
+  # Only entry point besides manual dispatch: ci.yml calls this as a
+  # required job so a failing scan actually blocks the Tier A gate, not
+  # just runs in parallel with no effect (docs/engineering/quality-strategy.md
+  # §1: lesson from the reused pattern in marcelo-goncalves-blog — CI that
+  # exists in YAML but doesn't gate). A standalone `pull_request` trigger
+  # used to coexist with this, running Semgrep/Gitleaks twice on every PR
+  # (once standalone, once nested under ci.yml) — removed 2026-08-19,
+  # found during the joint Claude/Codex architecture review.
   workflow_call:
 
 env:

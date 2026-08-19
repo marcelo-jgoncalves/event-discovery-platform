@@ -39,10 +39,24 @@ test('classifies a Music segment event as CONCERT, NOT_APPLICABLE for work linki
       id: 'concert1',
       name: 'Some Band Live',
       classifications: [{ segment: { name: 'Music' } }],
+      dates: { start: { dateTime: '2026-09-10T23:00:00Z' } },
     }),
     now,
   );
 
   assert.equal(event.type, 'CONCERT');
   assert.equal(event.resolutionStatus, 'NOT_APPLICABLE');
+});
+
+test('rejects a payload missing dates.start.dateTime instead of silently using ingestion time', () => {
+  assert.throws(() =>
+    normalizeTicketmasterEvent(
+      tmEvent({
+        id: 'concert2',
+        name: 'Some Band Live',
+        classifications: [{ segment: { name: 'Music' } }],
+      }),
+      now,
+    ),
+  );
 });
