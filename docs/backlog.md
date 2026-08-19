@@ -265,8 +265,12 @@ Ver `docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md` (P0 já 
       auditoria é considerado resolvido/arquivado)
 [ ] Definir trigger numérico de migração de docs/backlog.md para issue
       tracker (equipe/itens simultâneos acima de N)
-[ ] AGENTS.md como contrato agnóstico de IA, com CLAUDE.md como adapter —
-      só se/quando múltiplos agentes de IA passarem a trabalhar no projeto
+[x] AGENTS.md como contrato agnóstico de IA, com CLAUDE.md como adapter —
+      feito 2026-08-19: Codex CLI passou a atuar como segundo revisor
+      (mesmo padrão já validado no projeto irmão expiration-tracker),
+      trigger observado. AGENTS.md cobre protocolo de debate Claude↔Codex
+      (obrigatório em decisões Nível 6 e mudanças Nível 4-5) e invocação;
+      CLAUDE.md continua fonte primária de regras operacionais
 ```
 
 ## Fora do MVP por decisão consciente (não implementar sem trigger)
