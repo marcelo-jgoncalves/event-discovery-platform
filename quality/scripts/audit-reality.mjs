@@ -31,6 +31,45 @@ check('branch protection enabled on main', () => {
   return 'enforce_admins=true';
 });
 
+// PCA-20260812-001 (architecture review, 2026-08-19): documentation/gh-cli
+// confirmation that required_status_checks exists is not proof it stays
+// configured — a later manual change to branch protection would silently
+// drop this back to "documented but not enforced" with no code-level
+// signal. Re-verified on every audit-reality run instead of once at fix
+// time. Minimum expected count is the 7 Tier A jobs confirmed live in the
+// architecture review (verify, integration-fast, dependency-review,
+// npm-audit, security-scans's semgrep + gitleaks, infra) — grows if Tier A
+// grows, never shrinks silently.
+check('required status checks configured on main (strict, >=7 contexts)', () => {
+  const strict = execFileSync(
+    'gh',
+    [
+      'api',
+      `repos/${REPO}/branches/main/protection/required_status_checks`,
+      '--jq',
+      '.strict',
+    ],
+    { encoding: 'utf8' },
+  ).trim();
+  if (strict !== 'true') throw new Error(`strict=${strict}, expected true`);
+
+  const contextsJson = execFileSync(
+    'gh',
+    [
+      'api',
+      `repos/${REPO}/branches/main/protection/required_status_checks`,
+      '--jq',
+      '.contexts // .checks | length',
+    ],
+    { encoding: 'utf8' },
+  ).trim();
+  const count = Number(contextsJson);
+  if (!Number.isFinite(count) || count < 7) {
+    throw new Error(`${count} required context(s), expected >= 7`);
+  }
+  return `strict=true, ${count} required context(s)`;
+});
+
 check('IAM role for CI OIDC exists', () => {
   const out = execFileSync(
     'aws',

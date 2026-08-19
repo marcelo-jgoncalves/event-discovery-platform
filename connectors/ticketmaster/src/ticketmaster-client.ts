@@ -6,9 +6,8 @@
 
 const TICKETMASTER_API_BASE_URL = 'https://app.ticketmaster.com/discovery/v2';
 
-// Engineering-quality review (2026-08-19): see tmdb-client.ts for why this
-// exists — a fetch with no deadline can hang the ingestion Lambda instead of
-// failing fast.
+// See tmdb-client.ts for why this exists — a fetch with no deadline can
+// hang the ingestion Lambda instead of failing fast.
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 
 export interface TicketmasterEventSearchResponse {

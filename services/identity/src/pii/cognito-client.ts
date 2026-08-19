@@ -29,9 +29,7 @@ export interface CognitoAuthClient {
   // Compensating action for signup.ts: if UsersTable.putProfileAndConsent
   // fails after Cognito already created the account, the caller deletes the
   // Cognito user so a retried signup with the same email doesn't hit
-  // UsernameExistsException against an account with no profile/consent —
-  // engineering-quality review, 2026-08-19 (Codex finding: signup had no
-  // compensation for this partial-failure case).
+  // UsernameExistsException against an account with no profile/consent.
   deleteUser(email: string): Promise<void>;
 }
 

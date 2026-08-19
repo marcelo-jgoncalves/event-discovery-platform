@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-// Architecture/process fitness function (engineering-quality review,
-// 2026-08-19, Codex finding: `npm run <script> --workspaces --if-present`
-// in scripts/run-workspaces.mjs silently skips any workspace whose
-// package.json omits the script — a new workspace could ship product code
-// with no "test"/"lint"/"typecheck" script and CI would stay green with 0
-// tests run for it instead of failing. This check makes that impossible:
-// every workspace with a package.json must declare all three required
-// scripts, or this fails loud in the same `quality:check` gate that
-// `verify` already ran before it.
+// Architecture/process fitness function: `npm run <script> --workspaces
+// --if-present` in scripts/run-workspaces.mjs silently skips any workspace
+// whose package.json omits the script — a new workspace could ship product
+// code with no "test"/"lint"/"typecheck" script and CI would stay green
+// with 0 tests run for it instead of failing. This check makes that
+// impossible: every workspace with a package.json must declare all three
+// required scripts, or this fails loud in the same `quality:check` gate
+// that `verify` already ran before it.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';

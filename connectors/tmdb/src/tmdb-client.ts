@@ -5,10 +5,10 @@
 
 const TMDB_API_BASE_URL = 'https://api.themoviedb.org/3';
 
-// Engineering-quality review (2026-08-19): a fetch with no deadline can hang
-// the ingestion Lambda for its full timeout on a stalled connection instead
-// of failing fast and letting the caller retry — same class of bug as an
-// unbounded read. 10s is generous for a single JSON page from this provider.
+// A fetch with no deadline can hang the ingestion Lambda for its full
+// timeout on a stalled connection instead of failing fast and letting the
+// caller retry — same class of bug as an unbounded read. 10s is generous for
+// a single JSON page from this provider.
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 
 export interface TmdbNowPlayingResponse {

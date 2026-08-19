@@ -13,10 +13,9 @@
 //
 // `--if-present` also means a workspace whose package.json omits a required
 // script (e.g. no "test") is silently skipped for that script instead of
-// failing the gate — quality/scripts/quality-check.mjs's
-// workspace-scripts-declared check (added in the engineering-quality
-// review, 2026-08-19) closes that gap by asserting every real workspace
-// declares typecheck/lint/test.
+// failing the gate — quality/policies/github/workspace-scripts-declared.mjs
+// (run from quality/scripts/quality-check.mjs) closes that gap by asserting
+// every real workspace declares typecheck/lint/test.
 import { existsSync, readdirSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 

@@ -49,8 +49,7 @@ export async function signup(
   // across services. If the DynamoDB write fails after Cognito already
   // created the account, compensate by deleting the orphaned Cognito user
   // instead of leaving an account with no profile/consent that a retried
-  // signup can never recreate (UsernameExistsException). Engineering-quality
-  // review, 2026-08-19 (Codex finding).
+  // signup can never recreate (UsernameExistsException).
   try {
     await deps.usersTable.putProfileAndConsent(profile, consent);
   } catch (err) {
