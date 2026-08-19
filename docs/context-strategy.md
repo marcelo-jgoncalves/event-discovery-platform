@@ -76,6 +76,8 @@ docs/engineering/
     code-conventions.md                     Convenções de código
     testing-strategy.md                     Estratégia de testes
     git-and-review-workflow.md              Fluxo de git/PR
+    resource-naming.md                      Convenção de nomes/tags de
+                                             recursos de infraestrutura
     joint-review-criteria.md                Critérios por eixo das revisões
                                              conjuntas Claude↔Codex
                                              (`AGENTS.md` §2.1) — fonte única,
@@ -86,13 +88,21 @@ docs/engineering/
     adr-NNN-*.md                            Decisions (ADRs consolidados
                                              por componente, ver README.md
                                              do índice para a contagem atual)
-  audits/                                   Evidence — vazio até a primeira
-                                             auditoria rodar
+  audits/                                   Evidence — populado desde
+                                             2026-08-11 (auditorias de
+                                             consistência e as revisões
+                                             conjuntas Claude↔Codex)
 
 docs/backlog.md                             Work state
 docs/api/                                   Vazio — nasce quando a primeira
                                              API for definida
-docs/operations/                            Operations — vazio
+docs/operations/                            Operations (nominal) — hoje
+                                             guarda prompts de kickoff de
+                                             fase encerrados (`status: done`,
+                                             `authority: historical`), não
+                                             runbooks — desvio de papel
+                                             conhecido, ver `docs/backlog.md`
+                                             §"Engenharia de contexto"
 docs/runbooks/                              Operations — vazio
 ```
 
@@ -173,7 +183,7 @@ Regra completa em `CLAUDE.md` §"Contexto efêmero". Resumo: raciocínio interme
 O ponto mais valioso identificado na auditoria do padrão anterior não foi nenhum controle técnico específico — foi a disciplina de **auditar contra a realidade, não contra a documentação** (`docs/engineering/quality-strategy.md` §9). Aplicado à própria estratégia de contexto:
 
 - `docs/engineering/audits/` recebe tanto auditorias de consistência de produto/código quanto revisões da própria estratégia de contexto (evidence, não architecture nem backlog).
-- `docs/backlog.md` tem uma seção "Dívida técnica conhecida" deliberadamente vazia hoje — o teste de que o sistema funciona é essa seção deixar de estar vazia assim que a primeira simplificação consciente for feita, em vez de ficar esquecida.
+- `docs/backlog.md` §"Dívida técnica conhecida" era deliberadamente vazia até 2026-08-19 — o teste de que o sistema funciona era essa seção deixar de estar vazia assim que a primeira simplificação consciente fosse feita, em vez de ficar esquecida. O teste já passou: a revisão conjunta de arquitetura desse dia populou a seção com os itens reais encontrados e corrigidos no mesmo dia (ver `docs/backlog.md`).
 - Todo trigger de evolução é numérico ou verificável, nunca "quando parecer necessário", e vive uma única vez (§5).
 
 ---
@@ -184,9 +194,15 @@ Consistente com "sofisticação segue complexidade observada" (`docs/engineering
 
 ```text
 docs/api/                 vazio — nasce quando a primeira API pública for definida
-docs/operations/          vazio — nasce com o primeiro ambiente real implantado
+docs/operations/          hoje guarda só prompts de kickoff encerrados
+                           (histórico), não runbooks reais — runbook
+                           operacional nasce com o primeiro ambiente real
+                           implantado
 docs/runbooks/            vazio — nasce com o primeiro procedimento operacional real
-docs/engineering/audits/  vazio até a primeira auditoria executada
+docs/engineering/audits/  populado desde 2026-08-11 (ver §3) — a lacuna
+                           real que resta aqui é o lifecycle de arquivamento
+                           (quando um achado é considerado resolvido/
+                           encerrado), ainda não definido
 metadata YAML completa    aplicada hoje aos documentos normativos centrais
                            (architecture.md, history/, system-overview.md,
                            glossary.md, ADRs); rollout para o restante de

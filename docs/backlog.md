@@ -277,10 +277,37 @@ Ver `docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md` (P0 já 
       docs/, não só nos normativos centrais já cobertos
 [ ] npm run context:check — links quebrados, índice de ADR ↔ arquivos,
       doc ativo referenciando arquivo superseded, backlog trigger resolve
+      → trigger: > 15 documentos com `authority: normative`, ou a primeira
+      vez que uma referência quebrada/doc superseded passar despercebida
+      por mais de uma sessão (o próprio caso disparou em 2026-08-19: a
+      revisão do eixo "Engenharia de Contexto" achou `context-strategy.md`
+      afirmando `docs/operations/`/`docs/engineering/audits/` "vazios" e
+      a seção "Dívida técnica conhecida" do backlog "deliberadamente
+      vazia" muito depois de deixarem de ser verdade — corrigido nessa
+      revisão, mas nada além de leitura manual pegou o drift)
 [ ] Lifecycle explícito de docs/engineering/audits/ (quando um achado de
       auditoria é considerado resolvido/arquivado)
 [ ] Definir trigger numérico de migração de docs/backlog.md para issue
       tracker (equipe/itens simultâneos acima de N)
+[ ] `docs/operations/` hoje guarda prompts de kickoff de fase encerrados
+      (`phase-0-kickoff-prompt.md`, `phase-1-kickoff-prompt.md`,
+      `status: done`/`authority: historical`), não runbooks — desvio do
+      papel "Operations" definido em `context-strategy.md` §2, já
+      apontado (sem resolução) na auditoria de 2026-08-11 §"papéis que
+      não se encaixam". Achado da revisão conjunta Claude↔Codex do eixo
+      "Engenharia de Contexto" (2026-08-19): mover os arquivos para um
+      local mais correto (ex. `docs/architecture/history/`, mesmo padrão
+      já usado para `architecture-v1.md`) tem custo real — 5+ arquivos
+      referenciam o caminho atual (`README.md`, `docs/backlog.md`, ADR-010,
+      `spec-identity.md`) → trigger: próxima vez que `docs/operations/`
+      ganhar um runbook real (primeiro ambiente implantado) — fazer a
+      reclassificação junto, não antes
+[ ] Portabilidade agnóstica de `AGENTS.md` declarada mas não plena —
+      achado da mesma revisão: o protocolo/invocação em `AGENTS.md` §3 é
+      escrito especificamente para Claude Code + Codex CLI, não um
+      formato neutro que um terceiro agente adotaria sem adaptação →
+      trigger: entrada de um terceiro agente de IA no projeto (mesmo
+      trigger que já criou o `AGENTS.md` em primeiro lugar)
 [x] AGENTS.md como contrato agnóstico de IA, com CLAUDE.md como adapter —
       feito 2026-08-19: Codex CLI passou a atuar como segundo revisor
       (mesmo padrão já validado no projeto irmão expiration-tracker),
