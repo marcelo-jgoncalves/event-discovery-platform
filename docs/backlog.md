@@ -289,7 +289,15 @@ Ver `docs/engineering/audits/2026-08-11-revisao-estrategia-contexto.md` (P0 já 
       leitura humana/agente — não é um gap novo, é o limite honesto do
       que este tipo de check consegue detectar sem NLP
 [ ] Lifecycle explícito de docs/engineering/audits/ (quando um achado de
-      auditoria é considerado resolvido/arquivado)
+      auditoria é considerado resolvido/arquivado) → trigger: > 8 arquivos
+      normativos em docs/engineering/audits/ (hoje: 4 audit docs +
+      reports/ + snapshots/, abaixo do limiar) ou a primeira vez que um
+      achado antigo for reaberto/repetido sem se saber se a versão
+      anterior contava como resolvida (o que já quase aconteceu nesta
+      revisão — Rodada 2 e 3 do eixo "Engenharia de Contexto" reconfirmam
+      achados de rodadas anteriores, mas o protocolo de rodadas do
+      `AGENTS.md` §2.1 já resolve isso para achados *dentro* de uma
+      revisão; falta só para achados *entre* revisões diferentes)
 [ ] Definir trigger numérico de migração de docs/backlog.md para issue
       tracker (equipe/itens simultâneos acima de N)
 [ ] `docs/operations/` hoje guarda prompts de kickoff de fase encerrados

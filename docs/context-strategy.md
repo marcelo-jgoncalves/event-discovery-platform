@@ -221,13 +221,20 @@ metadata YAML completa    aplicada hoje aos documentos normativos centrais
                            (architecture.md, history/, system-overview.md,
                            glossary.md, ADRs); rollout para o restante de
                            docs/ é trabalho futuro, não urgente
-context:check automatizado (link quebrado, índice de ADR ↔ arquivos,
-                           doc ativo referenciando arquivo superseded) —
-                           vale a pena quando o volume de documentos
-                           justificar automação, não antes
-AGENTS.md como contrato agnóstico de fornecedor de IA — CLAUDE.md
-                           permanece o contrato único enquanto só um
-                           agente for usado neste projeto
+context:check automatizado — implementado em 2026-08-19 (QR-021,
+                           `quality/scripts/context-check.mjs`, gate de CI)
+                           para a classe mecânica (link quebrado, índice de
+                           ADR ↔ arquivos); doc ativo referenciando arquivo
+                           `superseded` ainda não é verificado
+                           automaticamente — trigger: quando `history/`
+                           ganhar um segundo tema além de
+                           `architecture-v1.md` (mais superfície para esse
+                           tipo de referência ficar obsoleta sem detecção)
+AGENTS.md — existe desde 2026-08-19 como contrato compartilhado por
+                           Claude Code e Codex CLI (os dois agentes em uso
+                           hoje); portabilidade agnóstica plena para um
+                           terceiro fornecedor de IA continua adiada, ver
+                           `docs/backlog.md` §"Engenharia de contexto"
 ```
 
 Não são lacunas esquecidas — são adiamentos conscientes, com o mesmo raciocínio de trigger aplicado ao resto da arquitetura: cada um entra em escopo quando o volume/necessidade real justificar, registrado aqui para não se perder.
