@@ -17,7 +17,7 @@ const ticketmasterEventPayloadSchema = z.object({
     .array(z.object({ segment: z.object({ name: z.string().optional() }).optional() }))
     .optional(),
   dates: z.object({
-    start: z.object({ dateTime: z.string() }),
+    start: z.object({ dateTime: z.string().refine((v) => !Number.isNaN(Date.parse(v))) }),
     status: z.object({ code: z.string().optional() }).optional(),
   }),
   _embedded: z
