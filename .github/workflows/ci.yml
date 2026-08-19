@@ -65,10 +65,19 @@ jobs:
       - name: Architecture fitness functions
         run: node quality/scripts/quality-check.mjs
 
-      # quality-rules.md QR-012/QR-013/QR-014/QR-015/QR-016 evidence depends
-      # on this proving invalid fixtures are still rejected and valid ones
-      # still accepted. Without this gate a degraded custom control could
-      # merge while everything else stayed green.
+      # EDP004/EDP005 (quality-self-test.mjs) shell out to the semgrep CLI —
+      # pinned to match security.yml's SAST job exactly, so both jobs run
+      # the same rule engine version against the same fixtures. Without
+      # this, self-test silently reports those two controls as FAIL
+      # ("semgrep not available locally") instead of proving them, which is
+      # exactly the false-confidence gap this gate exists to prevent.
+      - name: Install Semgrep
+        run: pip install semgrep==1.99.0
+
+      # quality-rules.md QR-012/QR-013/QR-014/QR-015/QR-016/QR-021 evidence
+      # depends on this proving invalid fixtures are still rejected and
+      # valid ones still accepted. Without this gate a degraded custom
+      # control could merge while everything else stayed green.
       - name: Quality control self-test (fixture-based)
         run: npm run quality:self-test
 
