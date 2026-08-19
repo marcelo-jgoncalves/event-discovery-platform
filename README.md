@@ -133,7 +133,16 @@ Phase 1 (Identity) e Phase 2 (Catalog) implementadas: `services/identity` (signu
       — ver docs/engineering/audits/ e docs/engineering/standards/
       joint-review-criteria.md; achados reais corrigidos a cada rodada,
       não só re-pontuados
-[ ] Phase 3 (Matching/Delivery) — próximo passo em aberto
+[x] CD real: .github/workflows/cd.yml aplica Identity+Catalog em `env/
+      dev.tfvars` a cada push em main, via a mesma role de CI (ADR-014,
+      superseded por ADR-015 — uma role só para plan+apply, não duas).
+      Falta um único apply local (amplia a policy da role de CI existente)
+      antes do primeiro push que dispare `cd.yml` — nenhum recurso de
+      produto (Cognito/DynamoDB/SQS) foi criado na AWS ainda
+[ ] Phase 3 (Matching/Delivery) — próximo passo em aberto, depende do
+      primeiro apply real (Tier B) para não repetir o gap de "specs sem
+      nada rodando" que as revisões conjuntas encontraram nos outros dois
+      eixos
 ```
 
 Checklist de bootstrap completo (o que falta e por quê): `docs/engineering/quality-strategy.md` §15 e `docs/backlog.md`.
